@@ -15,7 +15,7 @@ Repositorio educativo para la materia de **Bases de Datos I** (UAGRM). Este espa
 
 Aquí se encuentran los enlaces directos a cada fase del desarrollo del proyecto:
 
-* 📁 [PRIMER AVANCE - Entrevista a dueño de un bazar y diseño conceptual](./Primer_avance)
+* 📁 [PRIMER AVANCE - Entrevista a dueño de un bazar y diseño conceptual](./Primer%20avance)
 
 ---
 
