@@ -22,7 +22,7 @@ Repositorio académico y portafolio de proyectos para la materia de **Bases de D
 
 Aquí se irán publicando los enlaces directos a cada fase del desarrollo del proyecto "Tienda de Novedades Mr. 5":
 
-* 📁 [FASE 1 - Entrevista a dueño de la tienda y diseño conceptual (Diagrama E-R)](./primer%20avance)
+* 📁 [FASE 1 - Entrevista a dueño de la tienda y diseño conceptual (Diagrama E-R)](./Primer%20avance)
 
 ---
 
