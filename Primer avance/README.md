@@ -15,4 +15,4 @@ Para automatizar las operaciones, se definieron las siguientes reglas de negocio
 5. Un producto es comprado por muchos clientes, y un cliente compra uno o muchos productos.
 
 ## 📊 Diagrama Entidad-Relación
-* 📄 [Clic aquí para ver o descargar el Diagrama en PDF](./diagrama.drawio.pdf)
+* 📄 [Clic aquí para ver o descargar el Diagrama en PDF](./Diagrama.drawio.pdf)
