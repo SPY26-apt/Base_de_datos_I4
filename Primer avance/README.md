@@ -96,7 +96,7 @@ erDiagram
         DATE fecha PK
         INTEGER cantidad
     }
-
+```
 
 ---
 
