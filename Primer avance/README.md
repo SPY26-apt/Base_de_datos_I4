@@ -98,7 +98,6 @@ erDiagram
     }
 
 
-
 ---
 
 ## 📎 Anexo: Modelo Conceptual Original
