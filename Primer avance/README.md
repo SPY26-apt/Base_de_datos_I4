@@ -59,7 +59,7 @@ Usamos notación UML simplificada de tres compartimentos para cada entidad:
 * **Identificación obligatoria del producto:** No se pueden registrar productos sin nombre y sin precio asignado (`NOT NULL`).
 * **Relación estricta de proveedores:** No se puede ingresar un nuevo producto al catálogo si no se le asocia un proveedor existente (`FK NOT NULL`).
 
-## 6) DER (Diagrama Entidad-Relación) — Notación Mermaid
+## 6) DER (Diagrama Entidad-Relación) — Notación Sirena
 
 A continuación se presenta el modelo conceptual generado automáticamente con Mermaid, además del archivo original adjunto:
 
@@ -94,5 +94,3 @@ erDiagram
         DATE fecha PK
         INTEGER cantidad
     }
-###📎 Anexo: Modelo Conceptual Original
-📄 Clic aquí para ver o descargar el diagrama original de Draw.io en PDF
