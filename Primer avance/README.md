@@ -59,5 +59,38 @@ Usamos notación UML simplificada de tres compartimentos para cada entidad:
 * **Identificación obligatoria del producto:** No se pueden registrar productos sin nombre y sin precio asignado (`NOT NULL`).
 * **Relación estricta de proveedores:** No se puede ingresar un nuevo producto al catálogo si no se le asocia un proveedor existente (`FK NOT NULL`).
 
-## 6) DER (Diagrama Entidad-Relación)
-* 📄 [Clic aquí para ver o descargar el Diagrama en PDF](./Diagrama.drawio.pdf)
+## 6) DER (Diagrama Entidad-Relación) — Notación Mermaid
+
+A continuación se presenta el modelo conceptual generado automáticamente con Mermaid, además del archivo original adjunto:
+
+```mermaid
+erDiagram
+    CLIENTE ||--o{ COMPRA : "realiza"
+    PRODUCTO ||--o{ COMPRA : "es incluido en"
+    PROVEEDOR ||--|{ PRODUCTO : "surte"
+
+    CLIENTE {
+        VARCHAR id_cliente PK
+        VARCHAR nombre
+    }
+    
+    PROVEEDOR {
+        INTEGER id_proveedor PK
+        VARCHAR nombre
+        VARCHAR telefono
+    }
+    
+    PRODUCTO {
+        INTEGER id_producto PK
+        INTEGER id_proveedor FK
+        VARCHAR nombre
+        DECIMAL precio
+        INTEGER stock
+    }
+    
+    COMPRA {
+        VARCHAR id_cliente PK,FK
+        INTEGER id_producto PK,FK
+        DATE fecha PK
+        INTEGER cantidad
+    }
