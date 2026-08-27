@@ -94,3 +94,5 @@ erDiagram
         DATE fecha PK
         INTEGER cantidad
     }
+    📎 Anexo: Modelo Conceptual Original
+📄 Clic aquí para ver o descargar el diagrama original de Draw.io en PDF
