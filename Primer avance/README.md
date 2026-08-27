@@ -48,6 +48,7 @@ Usamos notación UML simplificada de tres compartimentos para cada entidad:
 │ + fecha: DATE DEFAULT CURRENT_DATE PK parcial
 │ + cantidad: INTEGER DEFAULT 1 CHECK (cantidad > 0)
 └──────────────────────┘
+---
 
 * 🖼️ [Clic aquí para abrir y ver la imagen del Diagrama UML](./diagrama_uml.jpg)
 
