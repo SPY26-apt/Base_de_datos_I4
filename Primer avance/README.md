@@ -96,7 +96,6 @@ erDiagram
         DATE fecha PK
         INTEGER cantidad
     }
-
 ---
 
 ## 📎 Anexo: Modelo Conceptual Original
