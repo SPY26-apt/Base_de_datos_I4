@@ -100,8 +100,6 @@ erDiagram
 
 ---
 
----
-
 ## 📎 Anexo: Modelo Conceptual Original
 
 Aquí puedes ver y descargar el diagrama original elaborado en Draw.io con todos los detalles visuales de las entidades y relaciones:
