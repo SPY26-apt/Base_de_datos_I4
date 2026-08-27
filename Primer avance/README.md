@@ -100,8 +100,10 @@ erDiagram
 
 ---
 
+---
+
 ## 📎 Anexo: Modelo Conceptual Original
 
 Aquí puedes ver y descargar el diagrama original elaborado en Draw.io con todos los detalles visuales de las entidades y relaciones:
 
-[![Ver Diagrama](https://img.shields.io/badge/📥_CLIC_AQUÍ_PARA_VER_EL_DIAGRAMA-Draw.io_/_PDF-0052cc?style=for-the-badge)](./Diagrama.drawio.pdf)
+[📥 Clic aquí para ver el diagrama (Draw.io / PDF)](./Diagrama.drawio.pdf)
