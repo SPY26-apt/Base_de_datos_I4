@@ -49,7 +49,7 @@ Usamos notación UML simplificada de tres compartimentos para cada entidad:
 │ + cantidad: INTEGER DEFAULT 1 CHECK (cantidad > 0)
 └──────────────────────┘
 
-[![Ver Diagrama UML](https://img.shields.io/badge/🖼️_CLIC_AQUÍ_PARA_VER_EL_DIAGRAMA_UML-Imagen_/_JPG-2ea44f?style=for-the-badge)](./diagrama_uml.jpg)
+* 🖼️ [Clic aquí para abrir y ver la imagen del Diagrama UML](./diagrama_uml.jpg)
 
 ## 4) Relaciones y cardinalidades (con justificación)
 * **PROVEEDOR (1) — (N) PRODUCTO**
