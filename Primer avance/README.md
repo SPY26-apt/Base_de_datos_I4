@@ -48,6 +48,8 @@ Usamos notación UML simplificada de tres compartimentos para cada entidad:
 │ + cantidad: INTEGER DEFAULT 1 CHECK (cantidad > 0)
 └──────────────────────┘
 
+* 🖼️ [Clic aquí para abrir y ver la imagen del Diagrama UML](./diagrama_uml.jpg)
+
 ## 4) Relaciones y cardinalidades (con justificación)
 * **PROVEEDOR (1) — (N) PRODUCTO**
   *Justificación:* Un proveedor distribuye múltiples productos a la tienda, pero cada producto registrado se asocia a un único proveedor principal para mantener el canal de reclamos ordenado.
