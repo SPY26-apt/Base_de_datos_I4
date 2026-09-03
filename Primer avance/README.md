@@ -3,13 +3,13 @@
 Aquí se documenta la recolección de requisitos obtenida de la tienda y el diseño inicial de la base de datos, siguiendo la estructura formal del proyecto.
 
 ## 1) Narración del cliente (requisitos en lenguaje natural)
-"Soy el dueño de la tienda de novedades y plásticos 'Mr. 5'. Tenemos varias sucursales y necesitamos un sistema para gestionar nuestra mercadería, proveedores y las ventas diarias. Aunque nuestros productos sí traen código de barras de fábrica, actualmente anotamos el inventario a mano, lo que hace que controlar el stock y los precios sea un caos. Un proveedor nos surte varios productos, y registramos cada producto con un proveedor principal para saber a quién reclamarle cuando falta mercadería. Las ventas aquí son rápidas y al contado; una regla estricta es que **no se fía a nadie**. Como somos un comercio informal de paso, casi todos compran de forma anónima, pero sí necesitamos anotar el Nombre y Teléfono de nuestros clientes más frecuentes para avisarles cuando nos llega mercadería nueva o resolver dudas de sus compras (qué se llevaron, cantidad y fecha)."
+"Soy el dueño de la tienda de novedades y plásticos 'Mr. 5'. Tenemos varias sucursales y necesitamos un sistema para gestionar nuestra mercadería, proveedores y las salidas diarias. Aunque nuestros productos sí traen código de barras de fábrica, actualmente anotamos el inventario a mano, lo que hace que controlar el stock y los precios sea un caos. Un proveedor nos surte varios productos, y registramos cada producto con un proveedor principal para saber a quién reclamarle cuando falta mercadería. Las ventas aquí son rápidas y al contado; una regla estricta es que **no se fía a nadie**. Como somos un comercio informal y de paso, la gente compra de forma anónima y rápida, no les pedimos datos personales. Lo que sí necesitamos con urgencia es que el sistema registre cada "Venta" o transacción que ocurre en el mostrador de forma automática, anotando la fecha, qué artículos exactos se llevaron en ese momento y la cantidad, para así poder descontarlos del inventario correctamente."
 
 ## 2) Suposiciones (decisiones para aclarar ambigüedades)
-* Como el negocio es informal, a los clientes frecuentes los identificaremos únicamente por su número de teléfono celular (`telefono`), el cual funcionará como su identificador único.
+* Como el negocio es de ventas rápidas y anónimas, no existirá la entidad "Cliente". En su lugar, el modelo se centrará en registrar el evento de la `VENTA` (como si fuera un ticket virtual interno).
 * Aunque la mayoría de productos tienen código de barras, el sistema generará un `id_producto` numérico interno. Esto es porque a veces llegan artículos plásticos sueltos sin etiqueta. El código de barras original se guardará como un dato opcional.
-* Se asume estrictamente que no existe el crédito o "fiado"; toda compra registrada se considera pagada al contado en el momento.
-* Una compra incluye varios productos y un producto es comprado por varios clientes (N:M). Esta asociación guarda la cantidad vendida y la fecha.
+* Se asume estrictamente que no existe el crédito o "fiado"; toda transacción de venta registrada se considera pagada al contado en el momento.
+* Una Venta (ticket) puede incluir varios productos distintos, y un mismo producto se vende en muchas ventas diferentes (N:M). Esta asociación guardará la cantidad de artículos salientes.
 
 ## 3) Identificación de Entidades, Atributos, Tipos y PK
 Usamos notación UML simplificada de tres compartimentos para cada entidad:
@@ -34,36 +34,29 @@ Usamos notación UML simplificada de tres compartimentos para cada entidad:
 └─────────────┘
 
 ┌─────────────┐
-│ CLIENTE     │
+│ VENTA       │
 ├─────────────┤
-│ + telefono: VARCHAR(15) PK
-│ + nombre: VARCHAR(100) NOT NULL
+│ + id_venta: INTEGER PK (AUTOINCREMENT)
+│ + fecha: DATE DEFAULT CURRENT_DATE
 └─────────────┘
 
 ┌──────────────────────┐
-│ COMPRA (CLIENTE_PROD)│
+│ DETALLE_VENTA        │
 ├──────────────────────┤
-│ + telefono_cliente: VARCHAR(15) FK → CLIENTE(telefono) PK parcial
+│ + id_venta: INTEGER FK → VENTA(id_venta) PK parcial
 │ + id_producto: INTEGER FK → PRODUCTO(id_producto) PK parcial
-│ + fecha: DATE DEFAULT CURRENT_DATE PK parcial
 │ + cantidad: INTEGER DEFAULT 1 CHECK (cantidad > 0)
 └──────────────────────┘
-
-
-
----
-
-* 🖼️ [Clic aquí para abrir y ver la imagen del Diagrama UML](./diagrama_uml.jpg)
 
 ## 4) Relaciones y cardinalidades (con justificación)
 * **PROVEEDOR (1) — (N) PRODUCTO**
   *Justificación:* Un proveedor distribuye múltiples productos a la tienda, pero cada producto registrado se asocia a un único proveedor principal para mantener el canal de reclamos ordenado.
-* **CLIENTE (N) — (M) PRODUCTO (mediante la tabla asociativa COMPRA)**
-  *Justificación:* Un cliente frecuente puede comprar varios productos en una visita. A su vez, un producto del inventario es comprado por muchos clientes. La tabla asociativa almacena la cantidad de artículos llevados y la fecha.
+* **VENTA (N) — (M) PRODUCTO (mediante la tabla asociativa DETALLE_VENTA)**
+  *Justificación:* Una transacción de venta en el mostrador puede incluir varios productos diferentes en un mismo momento. A su vez, un producto específico del inventario es despachado en muchas ventas a lo largo del tiempo. La tabla asociativa almacena la cantidad exacta de artículos llevados en ese ticket.
 
 ## 5) Reglas de negocio y restricciones importantes
-* **Cero crédito (No se fía):** El sistema asume que el 100% de las transacciones son al contado. 
-* **Stock no negativo:** El inventario nunca puede ser menor a cero (`CHECK stock >= 0`). 
+* **Cero crédito (No se fía):** El sistema asume que el 100% de las ventas son pagadas al contado en el mostrador. 
+* **Stock no negativo:** El inventario nunca puede ser menor a cero (`CHECK stock >= 0`). El sistema deberá impedir una venta si la cantidad solicitada supera al stock.
 * **Relación estricta de proveedores:** No se puede ingresar un nuevo producto al catálogo si no se le asocia un proveedor existente (`FK NOT NULL`).
 
 ## 6) DER (Diagrama Entidad-Relación) — Notación Sirena
@@ -72,13 +65,13 @@ A continuación se presenta el modelo conceptual generado automáticamente, adem
 
 ```mermaid
 erDiagram
-    CLIENTE ||--o{ COMPRA : "realiza"
-    PRODUCTO ||--o{ COMPRA : "es incluido en"
+    VENTA ||--o{ DETALLE_VENTA : "contiene"
+    PRODUCTO ||--o{ DETALLE_VENTA : "es despachado en"
     PROVEEDOR ||--|{ PRODUCTO : "surte"
 
-    CLIENTE {
-        VARCHAR telefono PK
-        VARCHAR nombre
+    VENTA {
+        INTEGER id_venta PK
+        DATE fecha
     }
     
     PROVEEDOR {
@@ -96,18 +89,8 @@ erDiagram
         INTEGER stock
     }
     
-    COMPRA {
-        VARCHAR telefono_cliente PK,FK
+    DETALLE_VENTA {
+        INTEGER id_venta PK,FK
         INTEGER id_producto PK,FK
-        DATE fecha PK
         INTEGER cantidad
     }
-```
-
----
-
-## 📎 Anexo: Modelo Conceptual Original
-
-Aquí puedes ver y descargar el diagrama original elaborado en Draw.io con todos los detalles visuales de las entidades y relaciones:
-
-[📥 Clic aquí para ver el diagrama (Draw.io / PDF)](./Diagrama.drawio.pdf)
