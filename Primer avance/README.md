@@ -96,6 +96,7 @@ erDiagram
         INTEGER id_producto PK,FK
         INTEGER cantidad
     }
+```
 
 ---
 
