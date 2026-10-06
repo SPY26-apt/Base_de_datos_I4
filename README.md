@@ -40,5 +40,5 @@ Aprendizaje basado en la resolución de problemas reales (casos de estudio). Tra
 
 Haz clic en las carpetas a continuación para ver la documentación y diagramas de cada avance de la materia:
 
-* 📂 **[Primer Avance: Sistema para Ferretería](./Primer_Avance/)** *(Contiene narración, supuestos, reglas de negocio y Diagrama ER)*
+* 📂 **[Primer Avance: Sistema ](./Primer_Avance/)** *(Contiene narración, supuestos, reglas de negocio y Diagrama ER)*
 * 📂 **[Segundo Avance](./Segundo_Avance/)** *(Próximamente...)*
