@@ -43,4 +43,4 @@ Para resolver este problema, el sistema se diseña bajo las siguientes reglas de
 
 En esta fase diseñamos el modelo conceptual basándonos en los requerimientos del negocio, identificando las entidades principales, sus atributos y las relaciones entre ellas antes de pasar a la estructura de tablas.
 
-[📄 Haz clic aquí para abrir el Diagrama Conceptual en PDF](./docs/Diagrama.drawio.pdf)
+[📄 Haz clic aquí para abrir el Diagrama Conceptual en PDF](./Diagrama.drawio.pdf)
