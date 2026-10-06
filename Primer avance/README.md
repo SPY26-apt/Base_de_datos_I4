@@ -1,16 +1,38 @@
-
-
 ## 📁 Proyecto: Sistema de Control de Inventario y Ventas ("Mr. 5")
 
 ### 1. Descripción de la Problemática
-La tienda "Mr. 5" es un comercio minorista e informal de artículos plásticos, útiles escolares y novedades. Actualmente llevan el control de su inventario a mano en cuadernos, lo que genera caos en el stock, desfases entre sucursales y dificultades para hacer el cuadre de caja por turno. Como las ventas en mostrador son rápidas y al contado, necesitan un sistema ágil que descuente el stock al instante sin ralentizar la fila pidiendo datos personales a los compradores.
+
+La tienda "Mr. 5" es un comercio minorista dedicado a la venta de artículos plásticos, útiles escolares y novedades.
+
+Actualmente, el control del inventario se realiza de forma manual mediante cuadernos y anotaciones, lo que genera diferencias entre el stock registrado y el stock real, dificultades para conocer las existencias disponibles en cada sucursal y poco control sobre las ventas realizadas diariamente.
+
+Como las ventas en mostrador son rápidas y al contado, el negocio necesita un sistema ágil que permita registrar cada transacción y descontar automáticamente los productos vendidos del inventario de la sucursal correspondiente, sin ralentizar la atención solicitando datos personales innecesarios a los compradores.
+
+Por este motivo, se propone desarrollar una base de datos que permita administrar proveedores, categorías, productos, sucursales, inventarios, empleados y ventas, manteniendo información actualizada y consistente.
+
 
 ### 2. Diseño de la Solución y Suposiciones Clave
-Para resolver este problema, el sistema se diseña bajo las siguientes reglas de negocio:
-* **Venta rápida y anónima:** Para evitar cuellos de botella en caja, no se registra al cliente. La transacción es el foco central.
-* **Manejo de Sucursales e Inventario:** El negocio cuenta con varias sucursales. Por lo tanto, el stock no es global, sino que se controla mediante un inventario específico por producto y sucursal.
-* **Control de Caja y Empleados:** Cada venta registra qué empleado la realizó y en qué sucursal, permitiendo el cuadre de caja y la responsabilidad por faltantes.
-* **Precio Histórico:** El precio de un producto puede variar con el tiempo, por lo que el detalle de la venta congela el `precio_unitario` al momento exacto de la transacción.
+
+Para resolver el problema identificado, el sistema se diseña bajo las siguientes reglas de negocio:
+
+* **Venta rápida y anónima:**  
+  Para evitar cuellos de botella durante la atención, no se registran datos personales del comprador. La transacción de `VENTA` constituye el elemento central del proceso comercial.
+
+* **Cero créditos:**  
+  No se realizan ventas fiadas o a crédito. Toda venta registrada se considera pagada completamente al momento de realizarse.
+
+* **Manejo de sucursales e inventario:**  
+  El negocio cuenta con varias sucursales. Por lo tanto, el stock no se administra como una cantidad global, sino mediante un inventario específico para cada combinación de producto y sucursal.
+
+* **Control de ventas y empleados:**  
+  Cada venta registra qué empleado realizó la operación y en qué sucursal ocurrió, permitiendo identificar al responsable de cada transacción y generar reportes por empleado y sucursal.
+
+* **Precio histórico:**  
+  El precio de venta de un producto puede variar con el tiempo. Por este motivo, `DETALLE_VENTA` almacena el `precio_unitario` aplicado en el momento exacto de cada transacción.
+
+* **Control de stock:**  
+  El inventario nunca podrá presentar cantidades negativas. Antes de confirmar una venta, deberá verificarse que exista stock suficiente del producto en la sucursal correspondiente.
+
 
 ## 3) Identificación de Entidades, Atributos, Tipos, PK y FK
 
@@ -61,7 +83,8 @@ Para resolver este problema, el sistema se diseña bajo las siguientes reglas de
 │ + id_sucursal: INTEGER FK → SUCURSAL(id_sucursal)                            │
 │ + id_producto: INTEGER FK → PRODUCTO(id_producto)                            │
 │ + stock: INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0)                       │
-│ ** PK COMPUESTA: (id_sucursal, id_producto) **                               │
+│                                                                              │
+│ PK COMPUESTA: (id_sucursal, id_producto)                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -93,29 +116,152 @@ Para resolver este problema, el sistema se diseña bajo las siguientes reglas de
 │ + id_producto: INTEGER FK → PRODUCTO(id_producto)                            │
 │ + cantidad: INTEGER NOT NULL DEFAULT 1 CHECK (cantidad > 0)                  │
 │ + precio_unitario: DECIMAL(10,2) NOT NULL CHECK (precio_unitario > 0)        │
-│ ** PK COMPUESTA: (id_venta, id_producto) **                                  │
+│                                                                              │
+│ PK COMPUESTA: (id_venta, id_producto)                                        │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 4) Relaciones y cardinalidades (con justificación)
 
-*   **PROVEEDOR (1) — (N) PRODUCTO:** Un proveedor surte múltiples productos al bazar, pero cada producto registrado se asocia a un único proveedor principal para mantener limpio el canal de reclamos y pedidos.
-*   **CATEGORIA (1) — (N) PRODUCTO:** Una categoría (ej. Plásticos, Útiles) agrupa muchos artículos, y cada producto pertenece a una sola categoría para facilitar los reportes de qué área vende más.
-*   **SUCURSAL (1) — (N) EMPLEADO:** Una sucursal física tiene asignados a varios empleados, y cada empleado está registrado en una sucursal base para el control del personal.
-*   **SUCURSAL (1) — (N) VENTA:** Una sucursal genera múltiples ventas a lo largo del día. Cada ticket emitido pertenece obligatoriamente al lugar físico donde se hizo la transacción.
-*   **EMPLEADO (1) — (N) VENTA:** Un trabajador (cajero/vendedor) atiende a muchos compradores en su turno, pero cada venta tiene un único responsable asociado para permitir el cuadre de caja ante faltantes.
-*   **SUCURSAL (1) — (N) INVENTARIO (N) — (1) PRODUCTO:** Relación asociativa. Un producto no tiene un stock global, sino que su cantidad disponible depende directamente de en qué sucursal se encuentra almacenado.
-*   **VENTA (1) — (N) DETALLE_VENTA (N) — (1) PRODUCTO:** Relación asociativa. Una transacción en el mostrador incluye varios productos diferentes en distintas cantidades. A su vez, un producto es despachado en muchas ventas a lo largo del tiempo. 
+## 4) Relaciones y Cardinalidades
 
-## 5) Reglas de negocio y restricciones importantes
+### PROVEEDOR — PRODUCTO
 
-1.  **Ventas rápidas y anónimas (Sin entidad CLIENTE):** Por la naturaleza del comercio informal "Mr. 5", pedir nombre y carnet a los compradores genera cuellos de botella. La prioridad operativa es descontar inventario, por lo que las ventas se asumen como "Consumidor Final".
-2.  **Cero créditos:** No se fía a nadie. Se asume que el 100% de la mercadería despachada es pagada al instante en el mostrador (EFECTIVO o QR).
-3.  **Restricciones de Stock:** El sistema no admite inventario negativo. La base de datos debe contemplar la regla `CHECK (stock >= 0)` en la tabla `INVENTARIO`, apoyada por una transacción lógica que impida la venta si no hay saldo disponible.
-4.  **Precios y Cantidades válidas:** Las cantidades vendidas y los precios no pueden ser nulos ni negativos. Se aplican reglas `CHECK > 0` y `NOT NULL`.
-5.  **Preservación del Precio Histórico:** El costo de un producto puede variar por inflación. Por ello, la tabla `DETALLE_VENTA` guarda el `precio_unitario` exacto del momento de la transacción, evitando que reportes de ventas pasadas se alteren si el `precio` en la tabla `PRODUCTO` sube en el futuro.
-## 6) Modelo Conceptual: DER (Notación de Chen)
+**PROVEEDOR (0..N) — PROVEE — (1..1) PRODUCTO**
 
-En esta fase diseñamos el modelo conceptual basándonos en los requerimientos del negocio, identificando las entidades principales, sus atributos y las relaciones entre ellas antes de pasar a la estructura de tablas.
+Un proveedor puede suministrar cero o muchos productos registrados en el sistema, mientras que cada producto debe estar asociado obligatoriamente a un único proveedor principal.
+
+Esta relación permite identificar rápidamente a qué proveedor debe realizarse un reclamo o pedido relacionado con un producto.
+
+
+### CATEGORIA — PRODUCTO
+
+**CATEGORIA (0..N) — CLASIFICA — (1..1) PRODUCTO**
+
+Una categoría puede agrupar cero o muchos productos, mientras que cada producto pertenece obligatoriamente a una sola categoría.
+
+Esto facilita la clasificación de los artículos y la generación de reportes por tipo de producto.
+
+
+### SUCURSAL — VENTA
+
+**SUCURSAL (0..N) — GENERA — (1..1) VENTA**
+
+Una sucursal puede generar múltiples ventas a lo largo del tiempo.
+
+Cada venta debe corresponder obligatoriamente a una sola sucursal, permitiendo conocer exactamente dónde ocurrió la transacción.
+
+
+### EMPLEADO — VENTA
+
+**EMPLEADO (0..N) — REGISTRA — (1..1) VENTA**
+
+Un empleado puede registrar múltiples ventas durante su actividad laboral.
+
+Cada venta debe tener un único empleado responsable de haber registrado la transacción.
+
+
+### SUCURSAL — INVENTARIO
+
+**SUCURSAL (0..N) — ALMACENA — (1..1) INVENTARIO**
+
+Una sucursal puede poseer múltiples registros de inventario.
+
+Cada registro de `INVENTARIO` pertenece obligatoriamente a una única sucursal.
+
+
+### PRODUCTO — INVENTARIO
+
+**PRODUCTO (0..N) — POSEE — (1..1) INVENTARIO**
+
+Un producto puede encontrarse disponible en diferentes sucursales y, por lo tanto, puede participar en múltiples registros de inventario.
+
+Cada registro de `INVENTARIO` corresponde a un único producto.
+
+La entidad asociativa `INVENTARIO` permite resolver la relación entre `SUCURSAL` y `PRODUCTO`, almacenando el stock correspondiente a cada combinación.
+
+La clave primaria compuesta será:
+
+`(id_sucursal, id_producto)`
+
+
+### VENTA — DETALLE_VENTA
+
+**VENTA (1..N) — TIENE — (1..1) DETALLE_VENTA**
+
+Una venta confirmada debe contener uno o varios registros de detalle.
+
+Cada registro de `DETALLE_VENTA` pertenece obligatoriamente a una única venta.
+
+
+### PRODUCTO — DETALLE_VENTA
+
+**PRODUCTO (0..N) — CORRESPONDE A — (1..1) DETALLE_VENTA**
+
+Un producto puede aparecer en múltiples ventas diferentes a lo largo del tiempo.
+
+Cada registro de `DETALLE_VENTA` corresponde obligatoriamente a un único producto.
+
+La entidad asociativa `DETALLE_VENTA` resuelve la relación muchos a muchos entre `VENTA` y `PRODUCTO`.
+
+La clave primaria compuesta será:
+
+`(id_venta, id_producto)`
+
+
+## 5) Reglas de Negocio y Restricciones Importantes
+
+* **Ventas rápidas y anónimas:**  
+  No se implementa una entidad `CLIENTE`. Debido a la naturaleza rápida de las operaciones de "Mr. 5", solicitar nombre, carnet, teléfono u otros datos personales generaría retrasos innecesarios durante la atención. Las operaciones se consideran ventas a consumidor final.
+
+* **Cero créditos:**  
+  No se permite realizar ventas a crédito o fiadas. Toda venta registrada en el sistema se considera pagada completamente al momento de realizarse.
+
+* **Métodos de pago:**  
+  Los métodos de pago contemplados inicialmente son `EFECTIVO` y `QR`. Toda venta deberá registrar obligatoriamente uno de estos métodos.
+
+* **Stock no negativo:**  
+  El inventario no podrá almacenar cantidades negativas. Se aplicará la siguiente restricción:
+
+  ```sql
+  CHECK (stock >= 0)
+UNIQUE
+```
+
+
+## 6) Modelo Conceptual: DER — Notación de Chen
+
+En esta fase se diseña el Modelo Entidad-Relación a partir de los requerimientos del negocio, identificando las entidades principales, sus atributos, relaciones y cardinalidades antes de realizar la transformación al modelo relacional.
+
+El modelo utiliza la notación tradicional de Chen:
+
+* **Rectángulos:** representan las entidades.
+* **Rombos:** representan las relaciones.
+* **Óvalos:** representan los atributos.
+* **Atributos subrayados:** representan los atributos identificadores.
+* **Cardinalidades:** indican la cantidad de ocurrencias que pueden participar en cada relación.
+
+Las entidades identificadas son:
+
+1. `PROVEEDOR`
+2. `CATEGORIA`
+3. `PRODUCTO`
+4. `SUCURSAL`
+5. `INVENTARIO`
+6. `EMPLEADO`
+7. `VENTA`
+8. `DETALLE_VENTA`
+
+Las relaciones principales son:
+
+* `PROVEEDOR` — **PROVEE** — `PRODUCTO`
+* `CATEGORIA` — **CLASIFICA** — `PRODUCTO`
+* `SUCURSAL` — **GENERA** — `VENTA`
+* `EMPLEADO` — **REGISTRA** — `VENTA`
+* `SUCURSAL` — **ALMACENA** — `INVENTARIO`
+* `PRODUCTO` — **POSEE** — `INVENTARIO`
+* `VENTA` — **TIENE** — `DETALLE_VENTA`
+* `PRODUCTO` — **CORRESPONDE A** — `DETALLE_VENTA`
+
+> **Nota:** En el modelo conceptual utilizando notación de Chen no es necesario representar las claves foráneas como atributos, debido a que las relaciones entre las entidades ya se encuentran expresadas mediante los rombos. Las claves foráneas aparecerán posteriormente durante la transformación al modelo relacional.
 
 [📄 Haz clic aquí para abrir el Diagrama Conceptual en PDF](./Diagrama.drawio.pdf)
