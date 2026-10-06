@@ -39,3 +39,9 @@ Para resolver este problema, el sistema se diseña bajo las siguientes reglas de
 3.  **Restricciones de Stock:** El sistema no admite inventario negativo. La base de datos debe contemplar la regla `CHECK (stock >= 0)` en la tabla `INVENTARIO`, apoyada por una transacción lógica que impida la venta si no hay saldo disponible.
 4.  **Precios y Cantidades válidas:** Las cantidades vendidas y los precios no pueden ser nulos ni negativos. Se aplican reglas `CHECK > 0` y `NOT NULL`.
 5.  **Preservación del Precio Histórico:** El costo de un producto puede variar por inflación. Por ello, la tabla `DETALLE_VENTA` guarda el `precio_unitario` exacto del momento de la transacción, evitando que reportes de ventas pasadas se alteren si el `precio` en la tabla `PRODUCTO` sube en el futuro.
+## 6) Modelo Conceptual: DER (Notación de Chen)
+
+En esta fase diseñamos el modelo conceptual basándonos en los requerimientos del negocio, identificando las entidades principales, sus atributos y las relaciones entre ellas antes de pasar a la estructura de tablas.
+
+<!-- BOTÓN PARA VER EL PDF -->
+[![Ver Diagrama Conceptual en PDF](https://img.shields.io/badge/📄_Ver_Diagrama_Conceptual-PDF-red?style=for-the-badge)](./docs/Diagrama.drawio.pdf)
