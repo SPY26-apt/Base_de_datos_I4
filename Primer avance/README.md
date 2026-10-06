@@ -146,7 +146,7 @@ Esto facilita la clasificación de los artículos y la generación de reportes p
 
 **SUCURSAL (0..N) — GENERA — (1..1) VENTA**
 
-Una sucursal puede generar múltiples ventas a lo largo del tiempo.
+Una sucursal puede generar cero o muchas ventas a lo largo del tiempo.
 
 Cada venta debe corresponder obligatoriamente a una sola sucursal, permitiendo conocer exactamente dónde ocurrió la transacción.
 
@@ -155,7 +155,7 @@ Cada venta debe corresponder obligatoriamente a una sola sucursal, permitiendo c
 
 **EMPLEADO (0..N) — REGISTRA — (1..1) VENTA**
 
-Un empleado puede registrar múltiples ventas durante su actividad laboral.
+Un empleado puede registrar cero o muchas ventas durante su actividad laboral.
 
 Cada venta debe tener un único empleado responsable de haber registrado la transacción.
 
@@ -164,7 +164,7 @@ Cada venta debe tener un único empleado responsable de haber registrado la tran
 
 **SUCURSAL (0..N) — ALMACENA — (1..1) INVENTARIO**
 
-Una sucursal puede poseer múltiples registros de inventario.
+Una sucursal puede poseer cero o múltiples registros de inventario.
 
 Cada registro de `INVENTARIO` pertenece obligatoriamente a una única sucursal.
 
@@ -175,9 +175,9 @@ Cada registro de `INVENTARIO` pertenece obligatoriamente a una única sucursal.
 
 Un producto puede encontrarse disponible en diferentes sucursales y, por lo tanto, puede participar en múltiples registros de inventario.
 
-Cada registro de `INVENTARIO` corresponde a un único producto.
+Cada registro de `INVENTARIO` corresponde obligatoriamente a un único producto.
 
-La entidad asociativa `INVENTARIO` permite resolver la relación entre `SUCURSAL` y `PRODUCTO`, almacenando el stock correspondiente a cada combinación.
+La entidad asociativa `INVENTARIO` permite resolver la relación muchos a muchos entre `SUCURSAL` y `PRODUCTO`, almacenando el stock correspondiente a cada combinación.
 
 La clave primaria compuesta será:
 
@@ -197,11 +197,11 @@ Cada registro de `DETALLE_VENTA` pertenece obligatoriamente a una única venta.
 
 **PRODUCTO (0..N) — CORRESPONDE A — (1..1) DETALLE_VENTA**
 
-Un producto puede aparecer en múltiples ventas diferentes a lo largo del tiempo.
+Un producto puede aparecer en cero o múltiples detalles de venta a lo largo del tiempo.
 
 Cada registro de `DETALLE_VENTA` corresponde obligatoriamente a un único producto.
 
-La entidad asociativa `DETALLE_VENTA` resuelve la relación muchos a muchos entre `VENTA` y `PRODUCTO`.
+La entidad asociativa `DETALLE_VENTA` permite resolver la relación muchos a muchos entre `VENTA` y `PRODUCTO`.
 
 La clave primaria compuesta será:
 
@@ -246,7 +246,7 @@ La clave primaria compuesta será:
   CHECK (cantidad > 0)
   ```
 
-  También deberá utilizarse la restricción:
+  También deberá aplicarse la restricción:
 
   ```sql
   NOT NULL
@@ -321,6 +321,6 @@ Las relaciones principales son:
 * `VENTA` — **TIENE** — `DETALLE_VENTA`
 * `PRODUCTO` — **CORRESPONDE A** — `DETALLE_VENTA`
 
-> **Nota:** En el modelo conceptual utilizando notación de Chen no es necesario representar las claves foráneas como atributos, debido a que las relaciones entre las entidades ya se encuentran expresadas mediante los rombos. Las claves foráneas aparecerán posteriormente durante la transformación al modelo relacional.
+> **Nota:** En el DER conceptual elaborado con notación de Chen no se representan las claves foráneas como atributos, ya que las relaciones entre las entidades se expresan mediante los rombos. Las claves foráneas sí se muestran en la sección de identificación de entidades y estructura relacional para documentar cómo será implementado posteriormente el modelo en la base de datos.
 
 [📄 Haz clic aquí para abrir el Diagrama Conceptual en PDF](./Diagrama.drawio.pdf)
