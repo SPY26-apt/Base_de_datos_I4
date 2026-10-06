@@ -224,8 +224,67 @@ La clave primaria compuesta será:
 
   ```sql
   CHECK (stock >= 0)
-UNIQUE
-```
+  ```
+
+  Además, antes de registrar una venta deberá verificarse que exista stock suficiente del producto en la sucursal donde ocurre la transacción.
+
+* **Actualización del inventario:**  
+  Cuando una venta sea confirmada, el sistema deberá disminuir del registro correspondiente en `INVENTARIO` la cantidad registrada en `DETALLE_VENTA`.
+
+  Para realizar la actualización se deberá considerar:
+
+  * El producto vendido.
+  * La sucursal donde ocurrió la venta.
+  * La cantidad solicitada.
+
+  Si la cantidad solicitada supera el stock disponible, la operación deberá ser rechazada.
+
+* **Cantidades válidas:**  
+  La cantidad almacenada en `DETALLE_VENTA` deberá ser obligatoria y mayor que cero.
+
+  ```sql
+  CHECK (cantidad > 0)
+  ```
+
+  También deberá utilizarse la restricción:
+
+  ```sql
+  NOT NULL
+  ```
+
+* **Precios válidos:**  
+  El precio actual almacenado en `PRODUCTO` deberá ser obligatorio y mayor que cero.
+
+  ```sql
+  CHECK (precio > 0)
+  ```
+
+  El precio unitario registrado en `DETALLE_VENTA` también deberá ser obligatorio y mayor que cero.
+
+  ```sql
+  CHECK (precio_unitario > 0)
+  ```
+
+* **Preservación del precio histórico:**  
+  El precio de venta de un producto puede variar con el tiempo.
+
+  Por este motivo:
+
+  * `PRODUCTO.precio` representa el precio de venta actual.
+  * `DETALLE_VENTA.precio_unitario` representa el precio aplicado al producto en una venta específica.
+
+  De esta manera, si posteriormente cambia el precio actual del producto, las ventas anteriores conservarán el precio con el que realmente fueron realizadas.
+
+* **Código de barras opcional:**  
+  El sistema utiliza `id_producto` como identificador interno y clave primaria del producto.
+
+  El atributo `codigo_barras` será opcional porque algunos artículos pueden llegar sin código de barras o etiqueta de fábrica.
+
+  Cuando exista un código de barras, este deberá ser único mediante la restricción:
+
+  ```sql
+  UNIQUE
+  ```
 
 
 ## 6) Modelo Conceptual: DER — Notación de Chen
