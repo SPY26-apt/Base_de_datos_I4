@@ -1,109 +1,51 @@
-# 🏢 Primer Avance: Requisitos y Modelo Conceptual
+# 🗄️ Bases de Datos I - Grupo I4
 
-Aquí se documenta la recolección de requisitos obtenida de la tienda y el diseño inicial de la base de datos, siguiendo la estructura formal del proyecto.
+Repositorio educativo para la materia de Bases de Datos I (UAGRM). Este espacio documenta el desarrollo de modelos conceptuales, lógicos y físicos a lo largo del semestre para el proyecto "Mr. 5".
 
-## 1) Narración del cliente (requisitos en lenguaje natural)
-El dueño de la tienda de novedades y materiales escolares. Tenemos varias sucursales y necesitamos un sistema para gestionar nuestra mercadería, proveedores y las salidas diarias. Aunque nuestros productos sí traen código de barras de fábrica, actualmente anotamos el inventario a mano, lo que hace que controlar el stock y los precios sea un caos. Un proveedor nos surte varios productos, y registramos cada producto con un proveedor principal para saber a quién reclamarle cuando falta mercadería. Las ventas aquí son rápidas y al contado; una regla estricta es que **no se fía a nadie**. Como somos un comercio informal y de paso, la gente compra de forma anónima y rápida, no les pedimos datos personales. Lo que sí necesitamos con urgencia es que el sistema registre cada "Venta" o transacción que ocurre en el mostrador de forma automática, anotando la fecha, qué artículos exactos se llevaron en ese momento y la cantidad, para así poder descontarlos del inventario correctamente.
-
-## 2) Suposiciones (decisiones para aclarar ambigüedades)
-* Como el negocio es de ventas rápidas y anónimas, no existirá la entidad "Cliente". En su lugar, el modelo se centrará en registrar el evento de la `VENTA` (como si fuera un ticket virtual interno).
-* Aunque la mayoría de productos tienen código de barras, el sistema generará un `id_producto` numérico interno. Esto es porque a veces llegan artículos plásticos sueltos sin etiqueta. El código de barras original se guardará como un dato opcional.
-* Se asume estrictamente que no existe el crédito o "fiado"; toda transacción de venta registrada se considera pagada al contado en el momento.
-* Una Venta (ticket) puede incluir varios productos distintos, y un mismo producto se vende en muchas ventas diferentes (N:M). Esta asociación guardará la cantidad de artículos salientes.
-
-## 3) Identificación de Entidades, Atributos, Tipos y PK
-Usamos notación UML simplificada de tres compartimentos para cada entidad:
-
-┌─────────────┐
-│ PROVEEDOR   │
-├─────────────┤
-│ + id_proveedor: INTEGER PK (AUTOINCREMENT)
-│ + nombre: VARCHAR(100) NOT NULL
-│ + telefono: VARCHAR(20)
-└─────────────┘
-
-┌─────────────┐
-│ PRODUCTO    │
-├─────────────┤
-│ + id_producto: INTEGER PK (AUTOINCREMENT)
-│ + id_proveedor: INTEGER FK → PROVEEDOR(id_proveedor) NOT NULL
-│ + codigo_barras: VARCHAR(50) UNIQUE
-│ + nombre: VARCHAR(100) NOT NULL
-│ + precio: DECIMAL(8,2) CHECK (precio > 0) NOT NULL
-│ + stock: INTEGER CHECK (stock >= 0) DEFAULT 0
-└─────────────┘
-
-┌─────────────┐
-│ VENTA       │
-├─────────────┤
-│ + id_venta: INTEGER PK (AUTOINCREMENT)
-│ + fecha: DATE DEFAULT CURRENT_DATE
-└─────────────┘
-
-┌──────────────────────┐
-│ DETALLE_VENTA        │
-├──────────────────────┤
-│ + id_venta: INTEGER FK → VENTA(id_venta) PK parcial
-│ + id_producto: INTEGER FK → PRODUCTO(id_producto) PK parcial
-│ + cantidad: INTEGER DEFAULT 1 CHECK (cantidad > 0)
-└──────────────────────┘
-
-* 🖼️ [Clic aquí para abrir y ver la imagen del Diagrama UML](./diagrama_uml.jpg)
-
-## 4) Relaciones y cardinalidades (con justificación)
-* **PROVEEDOR (1) — (N) PRODUCTO**
-  *Justificación:* Un proveedor distribuye múltiples productos a la tienda, pero cada producto registrado se asocia a un único proveedor principal para mantener el canal de reclamos ordenado.
-* **VENTA (N) — (M) PRODUCTO (mediante la tabla asociativa DETALLE_VENTA)**
-  *Justificación:* Una transacción de venta en el mostrador puede incluir varios productos diferentes en un mismo momento. A su vez, un producto específico del inventario es despachado en muchas ventas a lo largo del tiempo. La tabla asociativa almacena la cantidad exacta de artículos llevados en ese ticket.
-
-## 5) Reglas de negocio y restricciones importantes
-* **Cero crédito (No se fía):** El sistema asume que el 100% de las ventas son pagadas al contado en el mostrador. 
-* **Stock no negativo:** El inventario nunca puede ser menor a cero (`CHECK stock >= 0`). El sistema deberá impedir una venta si la cantidad solicitada supera al stock.
-* **Relación estricta de proveedores:** No se puede ingresar un nuevo producto al catálogo si no se le asocia un proveedor existente (`FK NOT NULL`).
-
-## 6) DER (Diagrama Entidad-Relación) — Notación Sirena
-
-A continuación se presenta el modelo conceptual generado automáticamente, además del archivo original adjunto:
-
-```mermaid
-erDiagram
-    VENTA ||--o{ DETALLE_VENTA : "contiene"
-    PRODUCTO ||--o{ DETALLE_VENTA : "es despachado en"
-    PROVEEDOR ||--|{ PRODUCTO : "surte"
-
-    VENTA {
-        INTEGER id_venta PK
-        DATE fecha
-    }
-    
-    PROVEEDOR {
-        INTEGER id_proveedor PK
-        VARCHAR nombre
-        VARCHAR telefono
-    }
-    
-    PRODUCTO {
-        INTEGER id_producto PK
-        INTEGER id_proveedor FK
-        VARCHAR codigo_barras
-        VARCHAR nombre
-        DECIMAL precio
-        INTEGER stock
-    }
-    
-    DETALLE_VENTA {
-        INTEGER id_venta PK,FK
-        INTEGER id_producto PK,FK
-        INTEGER cantidad
-    }
-
-```
-
+**Información del Curso:**
+* **Materia:** Bases de Datos I
+* **Grupo:** I4
+* **Universidad:** UAGRM
+* **Estudiante:** Saúl Pedrazas
 
 ---
 
-## 📎 Anexo: Modelo Conceptual Original
+## 📁 Proyecto: Sistema de Control de Inventario y Ventas ("Mr. 5")
 
-Aquí puedes ver y descargar el diagrama original elaborado en Draw.io con todos los detalles visuales de las entidades y relaciones:
+### 1. Descripción de la Problemática
+La tienda "Mr. 5" es un comercio minorista e informal de artículos plásticos, útiles escolares y novedades. Actualmente llevan el control de su inventario a mano en cuadernos, lo que genera caos en el stock, desfases entre sucursales y dificultades para hacer el cuadre de caja por turno. Como las ventas en mostrador son rápidas y al contado, necesitan un sistema ágil que descuente el stock al instante sin ralentizar la fila pidiendo datos personales a los compradores.
 
-* 📥 [Clic aquí para ver y descargar el diagrama (Draw.io / PDF)](./Diagrama.drawio.pdf)
+### 2. Diseño de la Solución y Suposiciones Clave
+Para resolver este problema, el sistema se diseña bajo las siguientes reglas de negocio:
+* **Venta rápida y anónima:** Para evitar cuellos de botella en caja, no se registra al cliente. La transacción es el foco central.
+* **Manejo de Sucursales e Inventario:** El negocio cuenta con varias sucursales. Por lo tanto, el stock no es global, sino que se controla mediante un inventario específico por producto y sucursal.
+* **Control de Caja y Empleados:** Cada venta registra qué empleado la realizó y en qué sucursal, permitiendo el cuadre de caja y la responsabilidad por faltantes.
+* **Precio Histórico:** El precio de un producto puede variar con el tiempo, por lo que el detalle de la venta congela el `precio_unitario` al momento exacto de la transacción.
+
+### 3. Diccionario de Entidades
+1. **PROVEEDOR:** Registra a quién se le reclama la mercadería.
+2. **CATEGORIA:** Clasifica los productos (ej. Plásticos, Útiles, Novedades) para reportes de ventas.
+3. **PRODUCTO:** Catálogo central de artículos con su precio actual y código de barras.
+4. **SUCURSAL:** Ubicaciones físicas del negocio.
+5. **INVENTARIO:** Tabla asociativa que controla la cantidad exacta de stock de un producto en una sucursal específica.
+6. **EMPLEADO:** Personal que trabaja en las sucursales y registra las ventas.
+7. **VENTA:** El ticket generado, registrando fecha, hora, método de pago y quién atendió.
+8. **DETALLE_VENTA:** Tabla asociativa que registra qué productos salieron en una venta, qué cantidad y a qué precio histórico.
+
+## 4) Relaciones y cardinalidades (con justificación)
+
+*   **PROVEEDOR (1) — (N) PRODUCTO:** Un proveedor surte múltiples productos al bazar, pero cada producto registrado se asocia a un único proveedor principal para mantener limpio el canal de reclamos y pedidos.
+*   **CATEGORIA (1) — (N) PRODUCTO:** Una categoría (ej. Plásticos, Útiles) agrupa muchos artículos, y cada producto pertenece a una sola categoría para facilitar los reportes de qué área vende más.
+*   **SUCURSAL (1) — (N) EMPLEADO:** Una sucursal física tiene asignados a varios empleados, y cada empleado está registrado en una sucursal base para el control del personal.
+*   **SUCURSAL (1) — (N) VENTA:** Una sucursal genera múltiples ventas a lo largo del día. Cada ticket emitido pertenece obligatoriamente al lugar físico donde se hizo la transacción.
+*   **EMPLEADO (1) — (N) VENTA:** Un trabajador (cajero/vendedor) atiende a muchos compradores en su turno, pero cada venta tiene un único responsable asociado para permitir el cuadre de caja ante faltantes.
+*   **SUCURSAL (1) — (N) INVENTARIO (N) — (1) PRODUCTO:** Relación asociativa. Un producto no tiene un stock global, sino que su cantidad disponible depende directamente de en qué sucursal se encuentra almacenado.
+*   **VENTA (1) — (N) DETALLE_VENTA (N) — (1) PRODUCTO:** Relación asociativa. Una transacción en el mostrador incluye varios productos diferentes en distintas cantidades. A su vez, un producto es despachado en muchas ventas a lo largo del tiempo. 
+
+## 5) Reglas de negocio y restricciones importantes
+
+1.  **Ventas rápidas y anónimas (Sin entidad CLIENTE):** Por la naturaleza del comercio informal "Mr. 5", pedir nombre y carnet a los compradores genera cuellos de botella. La prioridad operativa es descontar inventario, por lo que las ventas se asumen como "Consumidor Final".
+2.  **Cero créditos:** No se fía a nadie. Se asume que el 100% de la mercadería despachada es pagada al instante en el mostrador (EFECTIVO o QR).
+3.  **Restricciones de Stock:** El sistema no admite inventario negativo. La base de datos debe contemplar la regla `CHECK (stock >= 0)` en la tabla `INVENTARIO`, apoyada por una transacción lógica que impida la venta si no hay saldo disponible.
+4.  **Precios y Cantidades válidas:** Las cantidades vendidas y los precios no pueden ser nulos ni negativos. Se aplican reglas `CHECK > 0` y `NOT NULL`.
+5.  **Preservación del Precio Histórico:** El costo de un producto puede variar por inflación. Por ello, la tabla `DETALLE_VENTA` guarda el `precio_unitario` exacto del momento de la transacción, evitando que reportes de ventas pasadas se alteren si el `precio` en la tabla `PRODUCTO` sube en el futuro.
