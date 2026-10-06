@@ -1,6 +1,6 @@
 # INF112 - Base de Datos I
 
-**Universidad:** Marcelo Villagra Cerezo  
+**Universidad:** Saul Pedrazas Yepez
 **Horario/Grupo:** 11:30/I4  
 
 ## 🎯 Objetivo General
