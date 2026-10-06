@@ -1,14 +1,4 @@
-# 🗄️ Bases de Datos I - Grupo I4
 
-Repositorio educativo para la materia de Bases de Datos I (UAGRM). Este espacio documenta el desarrollo de modelos conceptuales, lógicos y físicos a lo largo del semestre para el proyecto "Mr. 5".
-
-**Información del Curso:**
-* **Materia:** Bases de Datos I
-* **Grupo:** I4
-* **Universidad:** UAGRM
-* **Estudiante:** Saúl Pedrazas
-
----
 
 ## 📁 Proyecto: Sistema de Control de Inventario y Ventas ("Mr. 5")
 
