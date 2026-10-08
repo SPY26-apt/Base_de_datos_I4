@@ -90,7 +90,7 @@ Para resolver el problema identificado, el sistema se diseña bajo las siguiente
 ┌───────────────────────────────────────────────────────────┐
 │ EMPLEADO                                                  │
 ├───────────────────────────────────────────────────────────┤
-│  id_empleado: INTEGER PK (AUTOINCREMENT)                 │
+│  id_empleado: INTEGER PK (AUTOINCREMENT)                  │
 │   nombre: VARCHAR(100) NOT NULL                           │
 │   cargo: VARCHAR(50) NOT NULL                             │
 └───────────────────────────────────────────────────────────┘
@@ -115,7 +115,7 @@ Para resolver el problema identificado, el sistema se diseña bajo las siguiente
 │   id_producto: INTEGER FK → PRODUCTO(id_producto)                            │
 │   cantidad: INTEGER NOT NULL DEFAULT 1 CHECK (cantidad > 0)                  │
 │   precio_unitario: DECIMAL(10,2) NOT NULL CHECK (precio_unitario > 0)        │
-│   PK COMPUESTA: (id_venta, id_producto)                                        │
+│   PK COMPUESTA: (id_venta, id_producto)                                      │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
