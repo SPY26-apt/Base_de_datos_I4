@@ -40,71 +40,70 @@ Para resolver el problema identificado, el sistema se diseña bajo las siguiente
 ┌───────────────────────────────────────────────────────────┐
 │ PROVEEDOR                                                 │
 ├───────────────────────────────────────────────────────────┤
-│ + id_proveedor: INTEGER PK (AUTOINCREMENT)                │
-│ + nombre: VARCHAR(100) NOT NULL                           │
-│ + telefono: VARCHAR(20)                                   │
+│   id_proveedor: INTEGER PK (AUTOINCREMENT)                │
+│   nombre: VARCHAR(100) NOT NULL                           │
+│   telefono: VARCHAR(20)                                   │
 └───────────────────────────────────────────────────────────┘
 
 
 ┌───────────────────────────────────────────────────────────┐
 │ CATEGORIA                                                 │
 ├───────────────────────────────────────────────────────────┤
-│ + id_categoria: INTEGER PK (AUTOINCREMENT)                │
-│ + nombre: VARCHAR(100) UNIQUE NOT NULL                    │
-│ + descripcion: VARCHAR(255)                               │
+│   id_categoria: INTEGER PK (AUTOINCREMENT)                │
+│   nombre: VARCHAR(100) UNIQUE NOT NULL                    │
+│   descripcion: VARCHAR(255)                               │
 └───────────────────────────────────────────────────────────┘
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ PRODUCTO                                                                     │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ + id_producto: INTEGER PK (AUTOINCREMENT)                                    │
-│ + id_proveedor: INTEGER FK → PROVEEDOR(id_proveedor) NOT NULL                │
-│ + id_categoria: INTEGER FK → CATEGORIA(id_categoria) NOT NULL                │
-│ + codigo_barras: VARCHAR(50) UNIQUE                                          │
-│ + nombre: VARCHAR(100) NOT NULL                                              │
-│ + precio: DECIMAL(10,2) NOT NULL CHECK (precio > 0)                         │
+│   id_producto: INTEGER PK (AUTOINCREMENT)                                    │
+│   id_proveedor: INTEGER FK → PROVEEDOR(id_proveedor) NOT NULL                │
+│   id_categoria: INTEGER FK → CATEGORIA(id_categoria) NOT NULL                │
+│   codigo_barras: VARCHAR(50) UNIQUE                                          │
+│   nombre: VARCHAR(100) NOT NULL                                              │
+│   precio: DECIMAL(10,2) NOT NULL CHECK (precio > 0)                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 
 
 ┌───────────────────────────────────────────────────────────┐
 │ SUCURSAL                                                  │
 ├───────────────────────────────────────────────────────────┤
-│ + id_sucursal: INTEGER PK (AUTOINCREMENT)                 │
-│ + nombre: VARCHAR(100) NOT NULL                           │
-│ + direccion: VARCHAR(255) NOT NULL                        │
-│ + telefono: VARCHAR(20)                                   │
+│   id_sucursal: INTEGER PK (AUTOINCREMENT)                 │
+│   nombre: VARCHAR(100) NOT NULL                           │
+│   direccion: VARCHAR(255) NOT NULL                        │
+│   telefono: VARCHAR(20)                                   │
 └───────────────────────────────────────────────────────────┘
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ INVENTARIO                                                                   │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ + id_sucursal: INTEGER FK → SUCURSAL(id_sucursal)                            │
-│ + id_producto: INTEGER FK → PRODUCTO(id_producto)                            │
-│ + stock: INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0)                       │
-│                                                                              │
-│ PK COMPUESTA: (id_sucursal, id_producto)                                     │
+│   id_sucursal: INTEGER FK → SUCURSAL(id_sucursal)                            │
+│   id_producto: INTEGER FK → PRODUCTO(id_producto)                            │
+│   stock: INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0)                       │
+│   PK COMPUESTA: (id_sucursal, id_producto)                                   |
 └──────────────────────────────────────────────────────────────────────────────┘
 
 
 ┌───────────────────────────────────────────────────────────┐
 │ EMPLEADO                                                  │
 ├───────────────────────────────────────────────────────────┤
-│ + id_empleado: INTEGER PK (AUTOINCREMENT)                 │
-│ + nombre: VARCHAR(100) NOT NULL                           │
-│ + cargo: VARCHAR(50) NOT NULL                             │
+│  id_empleado: INTEGER PK (AUTOINCREMENT)                 │
+│   nombre: VARCHAR(100) NOT NULL                           │
+│   cargo: VARCHAR(50) NOT NULL                             │
 └───────────────────────────────────────────────────────────┘
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ VENTA                                                                        │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ + id_venta: INTEGER PK (AUTOINCREMENT)                                       │
-│ + id_sucursal: INTEGER FK → SUCURSAL(id_sucursal) NOT NULL                   │
-│ + id_empleado: INTEGER FK → EMPLEADO(id_empleado) NOT NULL                   │
-│ + fecha_hora: DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP                    │
-│ + metodo_pago: VARCHAR(20) NOT NULL                                          │
+│   id_venta: INTEGER PK (AUTOINCREMENT)                                       │
+│   id_sucursal: INTEGER FK → SUCURSAL(id_sucursal) NOT NULL                   │
+│   id_empleado: INTEGER FK → EMPLEADO(id_empleado) NOT NULL                   │
+│   fecha_hora: DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP                    │
+│   metodo_pago: VARCHAR(20) NOT NULL                                          │
 │   CHECK (metodo_pago IN ('EFECTIVO', 'QR'))                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
 
@@ -112,12 +111,11 @@ Para resolver el problema identificado, el sistema se diseña bajo las siguiente
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ DETALLE_VENTA                                                                │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ + id_venta: INTEGER FK → VENTA(id_venta)                                     │
-│ + id_producto: INTEGER FK → PRODUCTO(id_producto)                            │
-│ + cantidad: INTEGER NOT NULL DEFAULT 1 CHECK (cantidad > 0)                  │
-│ + precio_unitario: DECIMAL(10,2) NOT NULL CHECK (precio_unitario > 0)        │
-│                                                                              │
-│ PK COMPUESTA: (id_venta, id_producto)                                        │
+│   id_venta: INTEGER FK → VENTA(id_venta)                                     │
+│   id_producto: INTEGER FK → PRODUCTO(id_producto)                            │
+│   cantidad: INTEGER NOT NULL DEFAULT 1 CHECK (cantidad > 0)                  │
+│   precio_unitario: DECIMAL(10,2) NOT NULL CHECK (precio_unitario > 0)        │
+│   PK COMPUESTA: (id_venta, id_producto)                                        │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
