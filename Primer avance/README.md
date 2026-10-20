@@ -1,6 +1,6 @@
 # 📁 Proyecto: Sistema de Control de Inventario y Ventas «Mr. 5»
 
-## 1) Narración del cliente (requisitos en lenguaje natural)
+## 1) Narración del cliente 
 
 Mr. 5 es un negocio dedicado a la venta de artículos plásticos, útiles escolares, productos de limpieza y otras novedades. Cuenta con dos sucursales, donde la atención está a cargo de personas que trabajan en el negocio, incluidos familiares.
 
