@@ -1,324 +1,460 @@
-## 📁 Proyecto: Sistema de Control de Inventario y Ventas ("Mr. 5")
+# 📁 Proyecto: Sistema de Control de Inventario y Ventas «Mr. 5»
 
-### 1. Descripción de la Problemática
+## 1) Narración del cliente (requisitos en lenguaje natural)
 
-La tienda "Mr. 5" es un comercio minorista dedicado a la venta de artículos plásticos, útiles escolares y novedades.
+Mr. 5 es un negocio dedicado a la venta de artículos plásticos, útiles escolares, productos de limpieza y otras novedades. Cuenta con dos sucursales, donde la atención está a cargo de personas que trabajan en el negocio, incluidos familiares.
 
-Actualmente, el control del inventario se realiza de forma manual mediante cuadernos y anotaciones, lo que genera diferencias entre el stock registrado y el stock real, dificultades para conocer las existencias disponibles en cada sucursal y poco control sobre las ventas realizadas diariamente.
+Actualmente, las existencias y las ventas se controlan mediante cuadernos y anotaciones. Esto dificulta saber cuántas unidades de cada producto quedan en cada local y puede generar diferencias entre lo anotado y lo que realmente está disponible.
 
-Como las ventas en mostrador son rápidas y al contado, el negocio necesita un sistema ágil que permita registrar cada transacción y descontar automáticamente los productos vendidos del inventario de la sucursal correspondiente, sin ralentizar la atención solicitando datos personales innecesarios a los compradores.
+El negocio necesita registrar sus productos, clasificarlos por categorías e identificar al proveedor principal de cada uno. También necesita conocer las existencias por sucursal, registrar las ventas y saber qué persona atendió cada operación.
 
-Por este motivo, se propone desarrollar una base de datos que permita administrar proveedores, categorías, productos, sucursales, inventarios, empleados y ventas, manteniendo información actualizada y consistente.
+Cuando un cliente compra, se deben registrar los productos que lleva, sus cantidades, el precio aplicado y la forma de pago. Antes de confirmar la venta, debe comprobarse que existen suficientes unidades en esa sucursal. Una vez confirmada, las cantidades vendidas deben descontarse del inventario correspondiente.
 
+Para identificar a los compradores sin solicitar demasiados datos, se propone registrar un identificador de cliente y su nombre. No se contempla solicitar carnet, teléfono ni dirección.
 
-### 2. Diseño de la Solución y Suposiciones Clave
+Con esta base de datos se busca mantener información organizada y consultar qué productos se venden, cuánto se vende y en qué sucursal se realiza cada operación.
 
-Para resolver el problema identificado, el sistema se diseña bajo las siguientes reglas de negocio:
+## 2) Suposiciones (decisiones para aclarar ambigüedades)
 
-* **Venta rápida y anónima:**  
-  Para evitar cuellos de botella durante la atención, no se registran datos personales del comprador. La transacción de `VENTA` constituye el elemento central del proceso comercial.
+Las siguientes decisiones delimitan el alcance del proyecto. Las que no hayan sido confirmadas con el negocio deberán validarse antes de la implementación definitiva.
 
-* **Cero créditos:**  
-  No se realizan ventas fiadas o a crédito. Toda venta registrada se considera pagada completamente al momento de realizarse.
+### Identificación del producto
 
-* **Manejo de sucursales e inventario:**  
-  El negocio cuenta con varias sucursales. Por lo tanto, el stock no se administra como una cantidad global, sino mediante un inventario específico para cada combinación de producto y sucursal.
+Cada producto representa un tipo o presentación de artículo, no una unidad física individual.
 
-* **Control de ventas y empleados:**  
-  Cada venta registra qué empleado realizó la operación y en qué sucursal ocurrió, permitiendo identificar al responsable de cada transacción y generar reportes por empleado y sucursal.
+Por ejemplo, diez escobas del mismo modelo comparten el mismo identificador de producto. La cantidad disponible se registra en INVENTARIO. Una escoba de otro modelo o presentación puede registrarse como un producto diferente.
 
-* **Precio histórico:**  
-  El precio de venta de un producto puede variar con el tiempo. Por este motivo, `DETALLE_VENTA` almacena el `precio_unitario` aplicado en el momento exacto de cada transacción.
+### Clasificación por categoría
 
-* **Control de stock:**  
-  El inventario nunca podrá presentar cantidades negativas. Antes de confirmar una venta, deberá verificarse que exista stock suficiente del producto en la sucursal correspondiente.
+Cada producto pertenece a una sola categoría. Una categoría puede reunir varios productos.
 
+Por ejemplo, la categoría «Útiles escolares» puede incluir lápices, cuadernos y borradores. Su identificador corresponde a la categoría, no a cada producto.
 
-## 3) Identificación de Entidades, Atributos, Tipos, PK y FK
+El nombre permite reconocer la categoría y la descripción explica qué clase de artículos agrupa. La asignación del producto a una categoría se realiza de manera explícita; no se deduce automáticamente de su nombre.
+
+### Proveedor principal
+
+Se registra un único proveedor principal por producto. Un mismo proveedor puede suministrar varios productos.
+
+En esta etapa no se contempla registrar todos los proveedores alternativos de un producto ni gestionar órdenes de compra.
+
+### Identificación del cliente
+
+Se registra un cliente mediante un identificador propio y su nombre. El nombre no será único, porque distintas personas pueden llamarse igual.
+
+El identificador distingue los registros dentro del sistema. Para asociar una nueva venta a un cliente existente, debe seleccionarse su registro; no se asumirá que dos compradores son la misma persona solamente porque tienen el mismo nombre.
+
+### Ventas al contado
+
+No se contemplan ventas fiadas ni a crédito. Una venta confirmada se considera pagada completamente.
+
+Se utilizará un solo método de pago por venta: efectivo o QR. Los pagos combinados quedan fuera del alcance inicial.
+
+### Existencias por sucursal
+
+El stock se administra por cada combinación de producto y sucursal.
+
+Por ejemplo, un producto puede tener doce unidades en una sucursal y cinco en la otra. Son dos registros de inventario diferentes, aunque se trate del mismo producto.
+
+### Personal y sucursales
+
+La entidad EMPLEADO representa a las personas que atienden y registran ventas, aunque sean familiares del propietario.
+
+Para mantener el alcance del DER actual, se supone que cada empleado tiene una sucursal asignada a la vez. Esta decisión queda pendiente de validación con el negocio.
+
+La sucursal asignada al empleado representa su ubicación actual. La sucursal registrada en una venta representa dónde ocurrió esa operación y se conserva aunque posteriormente cambie la asignación del empleado.
+
+### Detalle de una venta
+
+Cada producto aparece una sola vez dentro de una misma venta. Si el cliente lleva varias unidades del mismo producto, se registra una línea con la cantidad total.
+
+El precio unitario guardado en esa línea corresponde al precio aplicado en el momento de la venta.
+
+### Alcance del inventario
+
+Se parte de una cantidad inicial verificada para cada producto y sucursal. Las ventas confirmadas disminuyen esa cantidad.
+
+El stock no puede obtenerse únicamente a partir de las ventas: también necesita un valor inicial y un mecanismo de actualización por reposición o corrección. El DER actual almacena las existencias, pero no incluye un historial detallado de compras, traslados o ajustes.
+
+## 3) Identificación de Entidades, Atributos, Tipos y PK
+
+Los siguientes recuadros muestran la estructura propuesta para pasar del DER a las tablas. Se incluyen también las claves foráneas para indicar cómo se implementarán las relaciones.
+
+Los tipos son orientativos y se ajustarán al gestor de base de datos elegido. «Autogenerado» indica que el sistema asignará el identificador; todavía no representa una instrucción SQL específica.
+
+- **PK:** clave primaria.
+- **FK:** clave foránea.
+- **NOT NULL:** dato obligatorio.
+- **UNIQUE:** valor que no puede repetirse.
+- **CHECK:** condición que deben cumplir los datos.
+
+### PROVEEDOR
+
+Registra al proveedor principal de los productos.
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ PROVEEDOR                                                 │
-├───────────────────────────────────────────────────────────┤
-│   id_proveedor: INTEGER PK (AUTOINCREMENT)                │
-│   nombre: VARCHAR(100) NOT NULL                           │
-│   telefono: VARCHAR(20)                                   │
-└───────────────────────────────────────────────────────────┘
-
-
-┌───────────────────────────────────────────────────────────┐
-│ CATEGORIA                                                 │
-├───────────────────────────────────────────────────────────┤
-│   id_categoria: INTEGER PK (AUTOINCREMENT)                │
-│   nombre: VARCHAR(100) UNIQUE NOT NULL                    │
-│   descripcion: VARCHAR(255)                               │
-└───────────────────────────────────────────────────────────┘
-
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ PRODUCTO                                                                     │
-├──────────────────────────────────────────────────────────────────────────────┤
-│   id_producto: INTEGER PK (AUTOINCREMENT)                                    │
-│   id_proveedor: INTEGER FK → PROVEEDOR(id_proveedor) NOT NULL                │
-│   id_categoria: INTEGER FK → CATEGORIA(id_categoria) NOT NULL                │
-│   codigo_barras: VARCHAR(50) UNIQUE                                          │
-│   nombre: VARCHAR(100) NOT NULL                                              │
-│   precio: DECIMAL(10,2) NOT NULL CHECK (precio > 0)                          │
-└──────────────────────────────────────────────────────────────────────────────┘
-
-
-┌───────────────────────────────────────────────────────────┐
-│ SUCURSAL                                                  │
-├───────────────────────────────────────────────────────────┤
-│   id_sucursal: INTEGER PK (AUTOINCREMENT)                 │
-│   nombre: VARCHAR(100) NOT NULL                           │
-│   direccion: VARCHAR(255) NOT NULL                        │
-│   telefono: VARCHAR(20)                                   │
-└───────────────────────────────────────────────────────────┘
-
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ INVENTARIO                                                                   │
-├──────────────────────────────────────────────────────────────────────────────┤
-│   id_sucursal: INTEGER FK → SUCURSAL(id_sucursal)                            │
-│   id_producto: INTEGER FK → PRODUCTO(id_producto)                            │
-│   stock: INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0)                       │
-│   PK COMPUESTA: (id_sucursal, id_producto)                                   |
-└──────────────────────────────────────────────────────────────────────────────┘
-
-
-┌───────────────────────────────────────────────────────────┐
-│ EMPLEADO                                                  │
-├───────────────────────────────────────────────────────────┤
-│  id_empleado: INTEGER PK (AUTOINCREMENT)                  │
-│   nombre: VARCHAR(100) NOT NULL                           │
-│   cargo: VARCHAR(50) NOT NULL                             │
-└───────────────────────────────────────────────────────────┘
-
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ VENTA                                                                        │
-├──────────────────────────────────────────────────────────────────────────────┤
-│   id_venta: INTEGER PK (AUTOINCREMENT)                                       │
-│   id_sucursal: INTEGER FK → SUCURSAL(id_sucursal) NOT NULL                   │
-│   id_empleado: INTEGER FK → EMPLEADO(id_empleado) NOT NULL                   │
-│   fecha_hora: DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP                    │
-│   metodo_pago: VARCHAR(20) NOT NULL                                          │
-│   CHECK (metodo_pago IN ('EFECTIVO', 'QR'))                                  │
-└──────────────────────────────────────────────────────────────────────────────┘
-
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ DETALLE_VENTA                                                                │
-├──────────────────────────────────────────────────────────────────────────────┤
-│   id_venta: INTEGER FK → VENTA(id_venta)                                     │
-│   id_producto: INTEGER FK → PRODUCTO(id_producto)                            │
-│   cantidad: INTEGER NOT NULL DEFAULT 1 CHECK (cantidad > 0)                  │
-│   precio_unitario: DECIMAL(10,2) NOT NULL CHECK (precio_unitario > 0)        │
-│   PK COMPUESTA: (id_venta, id_producto)                                      │
-└──────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│ PROVEEDOR                                                    │
+├──────────────────────────────────────────────────────────────┤
+│ id_proveedor: INTEGER PK, autogenerado                         │
+│ nombre: VARCHAR(100) NOT NULL                                 │
+│ telefono: VARCHAR(20)                                         │
+└──────────────────────────────────────────────────────────────┘
 ```
 
+### CATEGORIA
+
+Agrupa productos de una misma clase. La descripción permite aclarar qué artículos pertenecen a esa categoría.
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ CATEGORIA                                                    │
+├──────────────────────────────────────────────────────────────┤
+│ id_categoria: INTEGER PK, autogenerado                         │
+│ nombre: VARCHAR(100) UNIQUE NOT NULL                          │
+│ descripcion: VARCHAR(255)                                     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### PRODUCTO
+
+Registra cada tipo o presentación de artículo que vende el negocio. Su precio corresponde al precio de venta actual.
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ PRODUCTO                                                     │
+├──────────────────────────────────────────────────────────────┤
+│ id_producto: INTEGER PK, autogenerado                          │
+│ id_proveedor: INTEGER NOT NULL                                │
+│   FK → PROVEEDOR(id_proveedor)                                │
+│ id_categoria: INTEGER NOT NULL                                │
+│   FK → CATEGORIA(id_categoria)                                │
+│ codigo_barras: VARCHAR(50) UNIQUE, opcional                    │
+│ nombre: VARCHAR(100) NOT NULL                                 │
+│ precio: DECIMAL(10,2) NOT NULL CHECK (precio > 0)               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### SUCURSAL
+
+Identifica cada local del negocio. El nombre corresponde al local, no a la persona encargada.
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ SUCURSAL                                                     │
+├──────────────────────────────────────────────────────────────┤
+│ id_sucursal: INTEGER PK, autogenerado                          │
+│ nombre: VARCHAR(100) NOT NULL                                 │
+│ direccion: VARCHAR(255) NOT NULL                              │
+│ telefono: VARCHAR(20)                                         │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### INVENTARIO
+
+Registra cuántas unidades de un producto hay en una sucursal. El atributo stock representa esa cantidad disponible.
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ INVENTARIO                                                   │
+├──────────────────────────────────────────────────────────────┤
+│ id_sucursal: INTEGER NOT NULL                                 │
+│   FK → SUCURSAL(id_sucursal)                                  │
+│ id_producto: INTEGER NOT NULL                                 │
+│   FK → PRODUCTO(id_producto)                                  │
+│ stock: INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0)           │
+│                                                              │
+│ PK COMPUESTA: (id_sucursal, id_producto)                       │
+└──────────────────────────────────────────────────────────────┘
+```
+
+La clave compuesta impide que se registren dos inventarios separados para el mismo producto en la misma sucursal.
+
+### EMPLEADO
+
+Identifica a la persona que atiende y registra las ventas. El cargo describe su función en el negocio, por ejemplo, atención de ventas o encargado.
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ EMPLEADO                                                     │
+├──────────────────────────────────────────────────────────────┤
+│ id_empleado: INTEGER PK, autogenerado                          │
+│ id_sucursal: INTEGER NOT NULL                                 │
+│   FK → SUCURSAL(id_sucursal)                                  │
+│ nombre: VARCHAR(100) NOT NULL                                 │
+│ cargo: VARCHAR(50) NOT NULL                                   │
+└──────────────────────────────────────────────────────────────┘
+```
 
-## 4) Relaciones y Cardinalidades
+Aquí, `id_sucursal` representa la sucursal actualmente asignada al empleado.
 
-### PROVEEDOR — PRODUCTO
+### CLIENTE
 
-**PROVEEDOR (0..N) — PROVEE — (1..1) PRODUCTO**
+Identifica al comprador asociado a una venta, solicitando únicamente su nombre.
 
-Un proveedor puede suministrar cero o muchos productos registrados en el sistema, mientras que cada producto debe estar asociado obligatoriamente a un único proveedor principal.
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ CLIENTE                                                      │
+├──────────────────────────────────────────────────────────────┤
+│ id_cliente: INTEGER PK, autogenerado                           │
+│ nombre: VARCHAR(100) NOT NULL                                 │
+└──────────────────────────────────────────────────────────────┘
+```
 
-Esta relación permite identificar rápidamente a qué proveedor debe realizarse un reclamo o pedido relacionado con un producto.
+### VENTA
 
+Registra los datos generales de la operación: cuándo ocurrió, dónde se realizó, quién la registró, a qué cliente corresponde y cómo se pagó.
 
-### CATEGORIA — PRODUCTO
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ VENTA                                                        │
+├──────────────────────────────────────────────────────────────┤
+│ id_venta: INTEGER PK, autogenerado                             │
+│ id_sucursal: INTEGER NOT NULL                                 │
+│   FK → SUCURSAL(id_sucursal)                                  │
+│ id_empleado: INTEGER NOT NULL                                 │
+│   FK → EMPLEADO(id_empleado)                                  │
+│ id_cliente: INTEGER NOT NULL                                  │
+│   FK → CLIENTE(id_cliente)                                    │
+│ fecha_hora: DATETIME NOT NULL                                 │
+│ metodo_pago: VARCHAR(20) NOT NULL                             │
+│   CHECK (metodo_pago IN ('EFECTIVO', 'QR'))                    │
+└──────────────────────────────────────────────────────────────┘
+```
 
-**CATEGORIA (0..N) — CLASIFICA — (1..1) PRODUCTO**
+### DETALLE_VENTA
 
-Una categoría puede agrupar cero o muchos productos, mientras que cada producto pertenece obligatoriamente a una sola categoría.
+Registra cada producto incluido en una venta, con su cantidad y el precio unitario aplicado.
 
-Esto facilita la clasificación de los artículos y la generación de reportes por tipo de producto.
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ DETALLE_VENTA                                                │
+├──────────────────────────────────────────────────────────────┤
+│ id_venta: INTEGER NOT NULL                                    │
+│   FK → VENTA(id_venta)                                        │
+│ id_producto: INTEGER NOT NULL                                 │
+│   FK → PRODUCTO(id_producto)                                  │
+│ cantidad: INTEGER NOT NULL CHECK (cantidad > 0)               │
+│ precio_unitario: DECIMAL(10,2) NOT NULL                        │
+│   CHECK (precio_unitario > 0)                                 │
+│                                                              │
+│ PK COMPUESTA: (id_venta, id_producto)                          │
+└──────────────────────────────────────────────────────────────┘
+```
 
+El subtotal de cada línea se obtiene multiplicando `cantidad × precio_unitario`. El total de la venta se obtiene sumando sus subtotales. En esta propuesta no se almacenan como atributos adicionales.
 
-### SUCURSAL — VENTA
+## 4) Relaciones y cardinalidades (con justificación)
 
-**SUCURSAL (0..N) — GENERA — (1..1) VENTA**
+Se utiliza `1:N` para expresar una relación de uno a muchos. La participación mínima se aclara en la explicación de cada relación.
 
-Una sucursal puede generar cero o muchas ventas a lo largo del tiempo.
+### PROVEEDOR — PROVEE — PRODUCTO
 
-Cada venta debe corresponder obligatoriamente a una sola sucursal, permitiendo conocer exactamente dónde ocurrió la transacción.
+**Cardinalidad: 1:N.**
 
+Un proveedor puede suministrar varios productos y cada producto tiene un único proveedor principal.
 
-### EMPLEADO — VENTA
+Se permite registrar un proveedor antes de asociarle productos. Por eso puede existir temporalmente un proveedor sin productos registrados.
 
-**EMPLEADO (0..N) — REGISTRA — (1..1) VENTA**
+Esta relación permite conocer al proveedor principal de cada artículo.
 
-Un empleado puede registrar cero o muchas ventas durante su actividad laboral.
+### CATEGORIA — CLASIFICA — PRODUCTO
 
-Cada venta debe tener un único empleado responsable de haber registrado la transacción.
+**Cardinalidad: 1:N.**
 
+Una categoría puede agrupar varios productos y cada producto pertenece a una sola categoría.
 
-### SUCURSAL — INVENTARIO
+Una categoría puede registrarse antes de incorporar sus productos. Esta relación permite organizar y consultar los artículos por su clasificación.
 
-**SUCURSAL (0..N) — ALMACENA — (1..1) INVENTARIO**
+### PRODUCTO — POSEE — INVENTARIO
 
-Una sucursal puede poseer cero o múltiples registros de inventario.
+**Cardinalidad: 1:N.**
 
-Cada registro de `INVENTARIO` pertenece obligatoriamente a una única sucursal.
+Un producto puede tener varios registros de inventario, uno por cada sucursal donde se controlen sus existencias. Cada registro de inventario corresponde a un solo producto.
 
+Un producto recién registrado puede no tener todavía registros de inventario.
 
-### PRODUCTO — INVENTARIO
+### SUCURSAL — ALMACENA — INVENTARIO
 
-**PRODUCTO (0..N) — POSEE — (1..1) INVENTARIO**
+**Cardinalidad: 1:N.**
 
-Un producto puede encontrarse disponible en diferentes sucursales y, por lo tanto, puede participar en múltiples registros de inventario.
+Una sucursal puede tener varios registros de inventario, correspondientes a distintos productos. Cada registro pertenece a una sola sucursal.
 
-Cada registro de `INVENTARIO` corresponde obligatoriamente a un único producto.
+Una sucursal puede registrarse antes de cargar sus existencias.
 
-La entidad asociativa `INVENTARIO` permite resolver la relación muchos a muchos entre `SUCURSAL` y `PRODUCTO`, almacenando el stock correspondiente a cada combinación.
+INVENTARIO vincula un producto con una sucursal y almacena la cantidad disponible de esa combinación.
 
-La clave primaria compuesta será:
+### EMPLEADO — TRABAJA EN — SUCURSAL
 
-`(id_sucursal, id_producto)`
+**Cardinalidad: N:1, equivalente a SUCURSAL 1:N EMPLEADO.**
 
+Varios empleados pueden estar asignados a una sucursal y cada empleado tiene una sola sucursal asignada a la vez, según la suposición adoptada.
 
-### VENTA — DETALLE_VENTA
+Se permite registrar una sucursal antes de asignarle personal. Esto no significa que pueda funcionar sin personas que la atiendan.
 
-**VENTA (1..N) — TIENE — (1..1) DETALLE_VENTA**
+### SUCURSAL — REALIZA — VENTA
 
-Una venta confirmada debe contener uno o varios registros de detalle.
+**Cardinalidad: 1:N.**
 
-Cada registro de `DETALLE_VENTA` pertenece obligatoriamente a una única venta.
+Una sucursal puede realizar muchas ventas y cada venta ocurre en una sola sucursal.
 
+Una sucursal puede no tener ventas registradas todavía. Esta relación permite consultar las ventas de cada local y determinar de qué inventario deben descontarse los productos.
 
-### PRODUCTO — DETALLE_VENTA
+### EMPLEADO — REGISTRA — VENTA
 
-**PRODUCTO (0..N) — CORRESPONDE A — (1..1) DETALLE_VENTA**
+**Cardinalidad: 1:N.**
 
-Un producto puede aparecer en cero o múltiples detalles de venta a lo largo del tiempo.
+Un empleado puede registrar muchas ventas y cada venta tiene un único empleado responsable de su registro.
 
-Cada registro de `DETALLE_VENTA` corresponde obligatoriamente a un único producto.
+Un empleado puede existir en el sistema sin haber registrado ventas todavía.
 
-La entidad asociativa `DETALLE_VENTA` permite resolver la relación muchos a muchos entre `VENTA` y `PRODUCTO`.
+### CLIENTE — REALIZA — VENTA
 
-La clave primaria compuesta será:
+**Cardinalidad: 1:N.**
 
-`(id_venta, id_producto)`
+Un cliente puede realizar varias compras y cada venta se asocia a un solo cliente.
 
+Un cliente puede registrarse antes de completar su primera compra. Se utiliza el nombre VENTA porque el modelo representa la operación desde el punto de vista del negocio.
 
-## 5) Reglas de Negocio y Restricciones Importantes
+### VENTA — TIENE — DETALLE_VENTA
 
-* **Ventas rápidas y anónimas:**  
-  No se implementa una entidad `CLIENTE`. Debido a la naturaleza rápida de las operaciones de "Mr. 5", solicitar nombre, carnet, teléfono u otros datos personales generaría retrasos innecesarios durante la atención. Las operaciones se consideran ventas a consumidor final.
+**Cardinalidad: 1:N.**
 
-* **Cero créditos:**  
-  No se permite realizar ventas a crédito o fiadas. Toda venta registrada en el sistema se considera pagada completamente al momento de realizarse.
+Una venta confirmada debe tener al menos un detalle y puede incluir varios. Cada detalle pertenece a una sola venta.
 
-* **Métodos de pago:**  
-  Los métodos de pago contemplados inicialmente son `EFECTIVO` y `QR`. Toda venta deberá registrar obligatoriamente uno de estos métodos.
+Esta relación permite representar una venta que contiene distintos productos.
 
-* **Stock no negativo:**  
-  El inventario no podrá almacenar cantidades negativas. Se aplicará la siguiente restricción:
+### DETALLE_VENTA — CORRESPONDE A — PRODUCTO
 
-  ```sql
-  CHECK (stock >= 0)
-  ```
+**Cardinalidad: N:1, equivalente a PRODUCTO 1:N DETALLE_VENTA.**
 
-  Además, antes de registrar una venta deberá verificarse que exista stock suficiente del producto en la sucursal donde ocurre la transacción.
+Cada detalle corresponde a un solo producto. Un producto puede aparecer en muchos detalles de ventas diferentes o no haber sido vendido todavía.
 
-* **Actualización del inventario:**  
-  Cuando una venta sea confirmada, el sistema deberá disminuir del registro correspondiente en `INVENTARIO` la cantidad registrada en `DETALLE_VENTA`.
+DETALLE_VENTA vincula los productos con las ventas y registra la cantidad y el precio aplicado en cada operación.
 
-  Para realizar la actualización se deberá considerar:
+## 5) Reglas de negocio y restricciones importantes
 
-  * El producto vendido.
-  * La sucursal donde ocurrió la venta.
-  * La cantidad solicitada.
+### Identificación de los registros
 
-  Si la cantidad solicitada supera el stock disponible, la operación deberá ser rechazada.
+Las claves primarias no pueden repetirse ni quedar vacías.
 
-* **Cantidades válidas:**  
-  La cantidad almacenada en `DETALLE_VENTA` deberá ser obligatoria y mayor que cero.
+INVENTARIO se identifica mediante la combinación de sucursal y producto. DETALLE_VENTA se identifica mediante la combinación de venta y producto.
 
-  ```sql
-  CHECK (cantidad > 0)
-  ```
+### Registro del cliente
 
-  También deberá aplicarse la restricción:
+Cada venta debe asociarse a un cliente registrado. Se solicita únicamente su nombre y el sistema genera su identificador.
 
-  ```sql
-  NOT NULL
-  ```
+No se exige que los nombres sean únicos ni se utilizan como sustituto del identificador.
 
-* **Precios válidos:**  
-  El precio actual almacenado en `PRODUCTO` deberá ser obligatorio y mayor que cero.
+### Ventas al contado y forma de pago
 
-  ```sql
-  CHECK (precio > 0)
-  ```
+No se permiten ventas fiadas ni a crédito. Toda venta confirmada se considera completamente pagada.
 
-  El precio unitario registrado en `DETALLE_VENTA` también deberá ser obligatorio y mayor que cero.
+Cada venta debe registrar un único método de pago: EFECTIVO o QR.
 
-  ```sql
-  CHECK (precio_unitario > 0)
-  ```
+### Venta con productos
 
-* **Preservación del precio histórico:**  
-  El precio de venta de un producto puede variar con el tiempo.
+No se puede confirmar una venta sin productos. Debe existir al menos un registro de DETALLE_VENTA asociado.
 
-  Por este motivo:
+### Cantidades válidas
 
-  * `PRODUCTO.precio` representa el precio de venta actual.
-  * `DETALLE_VENTA.precio_unitario` representa el precio aplicado al producto en una venta específica.
+La cantidad vendida debe ser un número entero mayor que cero.
 
-  De esta manera, si posteriormente cambia el precio actual del producto, las ventas anteriores conservarán el precio con el que realmente fueron realizadas.
+```sql
+CHECK (cantidad > 0)
+```
 
-* **Código de barras opcional:**  
-  El sistema utiliza `id_producto` como identificador interno y clave primaria del producto.
+No se permiten líneas de venta con cantidad cero o negativa.
 
-  El atributo `codigo_barras` será opcional porque algunos artículos pueden llegar sin código de barras o etiqueta de fábrica.
+### Stock no negativo
 
-  Cuando exista un código de barras, este deberá ser único mediante la restricción:
+Las existencias deben ser un número entero mayor o igual que cero.
 
-  ```sql
-  UNIQUE
-  ```
+```sql
+CHECK (stock >= 0)
+```
 
+Tener stock cero significa que el producto no tiene unidades disponibles en esa sucursal; no significa que deba eliminarse su registro.
 
-## 6) Modelo Conceptual: DER — Notación de Chen
+### Verificación antes de vender
 
-En esta fase se diseña el Modelo Entidad-Relación a partir de los requerimientos del negocio, identificando las entidades principales, sus atributos, relaciones y cardinalidades antes de realizar la transformación al modelo relacional.
+Antes de confirmar una venta, se debe comprobar que exista un registro de inventario y stock suficiente para cada producto en la sucursal de la operación.
 
-El modelo utiliza la notación tradicional de Chen:
+Si no hay unidades suficientes, la venta no debe confirmarse en esas condiciones.
 
-* **Rectángulos:** representan las entidades.
-* **Rombos:** representan las relaciones.
-* **Óvalos:** representan los atributos.
-* **Atributos subrayados:** representan los atributos identificadores.
-* **Cardinalidades:** indican la cantidad de ocurrencias que pueden participar en cada relación.
+### Actualización del inventario
 
-Las entidades identificadas son:
+Al confirmar una venta, se descuenta del inventario correspondiente la cantidad de cada producto vendido:
 
-1. `PROVEEDOR`
-2. `CATEGORIA`
-3. `PRODUCTO`
-4. `SUCURSAL`
-5. `INVENTARIO`
-6. `EMPLEADO`
-7. `VENTA`
-8. `DETALLE_VENTA`
+```text
+Nuevo stock = stock anterior − cantidad vendida
+```
 
-Las relaciones principales son:
+La actualización debe considerar el producto y la sucursal. Una venta realizada en un local no debe descontar las existencias del otro.
 
-* `PROVEEDOR` — **PROVEE** — `PRODUCTO`
-* `CATEGORIA` — **CLASIFICA** — `PRODUCTO`
-* `SUCURSAL` — **GENERA** — `VENTA`
-* `EMPLEADO` — **REGISTRA** — `VENTA`
-* `SUCURSAL` — **ALMACENA** — `INVENTARIO`
-* `PRODUCTO` — **POSEE** — `INVENTARIO`
-* `VENTA` — **TIENE** — `DETALLE_VENTA`
-* `PRODUCTO` — **CORRESPONDE A** — `DETALLE_VENTA`
+El registro de la venta, sus detalles y el descuento de inventario deben completarse como una sola operación: si alguna parte falla, no deben quedar cambios incompletos.
 
-> **Nota:** En el DER conceptual elaborado con notación de Chen no se representan las claves foráneas como atributos, ya que las relaciones entre las entidades se expresan mediante los rombos. Las claves foráneas sí se muestran en la sección de identificación de entidades y estructura relacional para documentar cómo será implementado posteriormente el modelo en la base de datos.
+### Precios válidos e históricos
 
-[📄 Haz clic aquí para abrir el Diagrama Conceptual en PDF](./Diagrama.drawio.pdf)
+El precio actual del producto y el precio unitario aplicado en una venta deben ser mayores que cero.
+
+```sql
+CHECK (precio > 0)
+CHECK (precio_unitario > 0)
+```
+
+Cambiar el precio de PRODUCTO no debe modificar los precios guardados en las ventas anteriores.
+
+### Código de barras
+
+El código de barras es opcional, porque algunos artículos pueden no tenerlo.
+
+Cuando se registre, debe ser único dentro del catálogo. El identificador interno del producto sigue siendo `id_producto`.
+
+### Integridad de las relaciones
+
+No se pueden registrar ventas, inventarios o detalles que hagan referencia a clientes, empleados, sucursales o productos inexistentes.
+
+Tampoco deben eliminarse registros referenciados si con ello se pierde la información necesaria para interpretar las ventas anteriores.
+
+### Asignación del personal
+
+Cada empleado tiene una sucursal asignada a la vez, de acuerdo con la suposición del proyecto.
+
+Un cambio posterior de asignación no debe modificar la sucursal guardada en las ventas que esa persona registró anteriormente.
+
+## 6) DER (diagrama) — notación Mermaid (para pegar en Markdown)
+
+> **Aclaración sobre la notación:** se conserva el encabezado de la estructura de la práctica. El DER de este proyecto está elaborado en Draw.io con notación de Chen, no en Mermaid. Se adjunta el diagrama utilizado para la exposición.
+
+El diagrama representa las entidades del negocio, sus atributos y las relaciones entre ellas.
+
+Se utiliza la siguiente simbología:
+
+- **Rectángulos:** entidades.
+- **Óvalos:** atributos.
+- **Atributos subrayados:** identificadores.
+- **Rombos:** relaciones.
+- **1 y N:** cardinalidades de uno a muchos.
+
+Las entidades representadas son:
+
+- PROVEEDOR.
+- CATEGORIA.
+- PRODUCTO.
+- SUCURSAL.
+- INVENTARIO.
+- EMPLEADO.
+- CLIENTE.
+- VENTA.
+- DETALLE_VENTA.
+
+PRODUCTO es una entidad central del modelo porque representa los artículos que se clasifican, se controlan por sucursal y se venden.
+
+INVENTARIO es una entidad asociativa que vincula PRODUCTO con SUCURSAL. Se identifica mediante la combinación de ambos.
+
+DETALLE_VENTA es una entidad asociativa que vincula VENTA con PRODUCTO. Se identifica mediante la combinación de ambos, bajo la regla de una línea por producto en cada venta.
+
+En el DER conceptual, las relaciones se representan mediante rombos. Las claves foráneas del apartado 3 documentan cómo se trasladarán esas relaciones al modelo de tablas; no es necesario repetirlas como óvalos en este diagrama.
+
+[📄 Ver el diagrama entidad-relación de Mr. 5](./miproyecto.drawio.pdf)
