@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Mr. 5 - Control de Inventario y Ventas</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body data-active-tab="{{TAB_ACTIVA}}">
+
+<div class="container">
+    <header class="header">
+        <div class="header-brand">
+            <span class="icon-box icon-blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </span>
+            <div>
+                <h1>Sistema de Control de Inventario y Ventas "Mr. 5"</h1>
+                <p>Gestión de Sucursales, Inventario y Ventas al Contado</p>
+            </div>
+        </div>
+    </header>
+
+    {{NOTIFICACIONES}}
+
+    <section class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">Productos en Catálogo</div>
+            <div class="kpi-value">{{KPI_TOTAL_PROD}}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Precio Promedio</div>
+            <div class="kpi-value">Bs {{KPI_PRECIO_PROM}}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Rango de Precios</div>
+            <div class="kpi-value">Bs {{KPI_PRECIO_MIN}} - {{KPI_PRECIO_MAX}}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Ventas Registradas</div>
+            <div class="kpi-value">{{KPI_TOTAL_VENTAS}}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Ingresos Totales</div>
+            <div class="kpi-value">Bs {{KPI_INGRESOS_TOTALES}}</div>
+        </div>
+    </section>
+
+    <nav class="tabs-nav">
+        <button type="button" class="tab-btn active" data-tab="pos" onclick="cambiarTab('pos')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            Punto de Venta
+        </button>
+        <button type="button" class="tab-btn" data-tab="inventario" onclick="cambiarTab('inventario')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Inventario y Productos
+        </button>
+        <button type="button" class="tab-btn" data-tab="entidades" onclick="cambiarTab('entidades')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Sucursales, Personal y Proveedores
+        </button>
+        <button type="button" class="tab-btn" data-tab="analitica" onclick="cambiarTab('analitica')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Reportes
+        </button>
+    </nav>
+
+    <section id="tab-pos" class="tab-content active">
+        <div class="grid-2col">
+            <div class="card">
+                <h2>
+                    <span class="title-with-icon">
+                        <span class="dot-icon dot-blue"></span>
+                        Registrar Venta
+                    </span>
+                </h2>
+                <form method="POST" action="/">
+                    <input type="hidden" name="accion" value="registrar_venta">
+                    <input type="hidden" name="tab_retorno" value="pos">
+
+                    <div class="form-row">
+                        <div>
+                            <label>Sucursal:</label>
+                            <select name="id_sucursal" required>{{OPCIONES_SUCURSAL}}</select>
+                        </div>
+                        <div>
+                            <label>Empleado:</label>
+                            <select name="id_empleado" required>{{OPCIONES_EMPLEADO}}</select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label>Cliente:</label>
+                            <select name="id_cliente" required>{{OPCIONES_CLIENTE}}</select>
+                        </div>
+                        <div>
+                            <label>Método de Pago:</label>
+                            <select name="metodo_pago" required>
+                                <option value="EFECTIVO">EFECTIVO</option>
+                                <option value="QR">QR</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="divider">
+                    <label>Detalle de Productos:</label>
+
+                    <div id="contenedor-lineas">
+                        <div class="item-venta-row">
+                            <div>
+                                <select name="id_producto[]" class="select-producto" onchange="recalcularTotalEstimado()" required>
+                                    {{OPCIONES_PRODUCTO}}
+                                </select>
+                            </div>
+                            <div>
+                                <input type="number" name="cantidad[]" class="input-cantidad" min="1" value="1" oninput="recalcularTotalEstimado()" required>
+                            </div>
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div class="pos-footer">
+                        <button type="button" class="btn btn-secondary" onclick="agregarLineaProducto()">
+                            + Agregar Producto
+                        </button>
+                        <div class="total-preview">
+                            Total: <strong id="monto-estimado">Bs 0.00</strong>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            Registrar Venta
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <span class="title-with-icon">
+                        <span class="dot-icon dot-green"></span>
+                        Nuevo Cliente
+                    </span>
+                </h2>
+                <form method="POST" action="/">
+                    <input type="hidden" name="accion" value="nuevo_cliente">
+                    <input type="hidden" name="tab_retorno" value="pos">
+                    <div class="form-row">
+                        <div>
+                            <label>Nombre del Cliente:</label>
+                            <input type="text" name="nombre" placeholder="Nombre del comprador" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Guardar Cliente</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>
+                <span class="title-with-icon">
+                    <span class="dot-icon dot-blue"></span>
+                    Resumen de Ventas
+                </span>
+            </h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Fecha y Hora</th><th>Sucursal</th>
+                        <th>Empleado</th><th>Cliente</th>
+                        <th>Método Pago</th><th>Total</th><th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>{{FILAS_VENTAS}}</tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>
+                <span class="title-with-icon">
+                    <span class="dot-icon dot-amber"></span>
+                    Detalle de Ventas Registradas
+                </span>
+            </h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Venta</th><th>Fecha y Hora</th><th>Sucursal</th><th>Cliente</th>
+                        <th>Producto</th><th>Cant.</th><th>Precio Unitario</th>
+                        <th>Subtotal</th><th>Pago</th>
+                    </tr>
+                </thead>
+                <tbody>{{FILAS_RECIBOS}}</tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="tab-inventario" class="tab-content">
+        <div class="grid-3col">
+            <div class="card">
+                <h2>
+                    <span class="title-with-icon">
+                        <span class="dot-icon dot-green"></span>
+                        Reponer Stock
+                    </span>
+                </h2>
+                <form method="POST" action="/">
+                    <input type="hidden" name="accion" value="reponer_stock">
+                    <input type="hidden" name="tab_retorno" value="inventario">
+                    <label>Sucursal:</label>
+                    <select name="id_sucursal" required>{{OPCIONES_SUCURSAL}}</select>
+                    <label>Producto:</label>
+                    <select name="id_producto" required>{{OPCIONES_PRODUCTO}}</select>
+                    <label>Cantidad a agregar:</label>
+                    <input type="number" name="cantidad" min="1" value="10" required>
+                    <button type="submit" class="btn btn-full">Actualizar Stock</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <span class="title-with-icon">
+                        <span class="dot-icon dot-blue"></span>
+                        Nuevo Producto
+                    </span>
+                </h2>
+                <form method="POST" action="/">
+                    <input type="hidden" name="accion" value="nuevo_producto">
+                    <input type="hidden" name="tab_retorno" value="inventario">
+                    <label>Nombre del Producto:</label>
+                    <input type="text" name="nombre" placeholder="Nombre del artículo" required>
+                    <div class="form-row">
+                        <div>
+                            <label>Código de Barras:</label>
+                            <input type="text" name="codigo_barras" placeholder="Opcional">
+                        </div>
+                        <div>
+                            <label>Precio (Bs):</label>
+                            <input type="number" step="0.50" min="0.50" name="precio" value="20.00" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label>Categoría:</label>
+                            <select name="id_categoria" required>{{OPCIONES_CATEGORIA}}</select>
+                        </div>
+                        <div>
+                            <label>Proveedor:</label>
+                            <select name="id_proveedor" required>{{OPCIONES_PROVEEDOR}}</select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-full">Guardar Producto</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <span class="title-with-icon">
+                        <span class="dot-icon dot-amber"></span>
+                        Modificar Precio Rápido
+                    </span>
+                </h2>
+                <form method="POST" action="/">
+                    <input type="hidden" name="accion" value="actualizar_precio">
+                    <input type="hidden" name="tab_retorno" value="inventario">
+                    <label>Producto:</label>
+                    <select name="id_producto" required>{{OPCIONES_PRODUCTO}}</select>
+                    <label>Nuevo Precio (Bs):</label>
+                    <input type="number" step="0.50" min="0.50" name="nuevo_precio" value="18.00" required>
+                    <button type="submit" class="btn btn-secondary btn-full">Actualizar Precio</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>
+                <span class="title-with-icon">
+                    <span class="dot-icon dot-blue"></span>
+                    Inventario por Sucursal
+                </span>
+            </h2>
+            <form method="GET" action="/" class="filter-bar">
+                <input type="hidden" name="tab" value="inventario">
+                <div>
+                    <label>Sucursal:</label>
+                    <select name="sucursal">{{OPCIONES_FILTRO_SUC}}</select>
+                </div>
+                <div>
+                    <label>Estado:</label>
+                    <select name="alerta">{{OPCIONES_FILTRO_ALERTA}}</select>
+                </div>
+                <button type="submit" class="btn">Filtrar</button>
+                <a href="/?tab=inventario" class="btn btn-secondary">Limpiar</a>
+            </form>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sucursal</th><th>Código</th><th>Producto</th>
+                        <th>Categoría</th><th>Proveedor</th><th>Precio</th>
+                        <th>Stock</th><th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>{{FILAS_INVENTARIO}}</tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>
+                <span class="title-with-icon">
+                    <span class="dot-icon dot-purple"></span>
+                    Catálogo General de Productos
+                </span>
+            </h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Código</th><th>Producto</th>
+                        <th>Categoría</th><th>Proveedor</th><th>Precio</th><th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>{{FILAS_CATALOGO_PROD}}</tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="tab-entidades" class="tab-content">
+        <div class="grid-2col">
+            <div class="card">
+                <h2>
+                    <span class="title-with-icon">
+                        <span class="dot-icon dot-blue"></span>
+                        Sucursales
+                    </span>
+                </h2>
+                <form method="POST" action="/" class="compact-form">
+                    <input type="hidden" name="accion" value="nueva_sucursal">
+                    <input type="hidden" name="tab_retorno" value="entidades">
+                    <div class="form-row">
+                        <input type="text" name="nombre" placeholder="Nombre de sucursal" required>
+                        <input type="text" name="direccion" placeholder="Dirección" required>
+                        <input type="text" name="telefono" placeholder="Teléfono" required>
+                    </div>
+                    <button type="submit" class="btn btn-sm">+ Agregar Sucursal</button>
+                </form>
+                <table>
+                    <thead><tr><th>ID</th><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+                    <tbody>{{FILAS_SUCURSALES}}</tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <span class="title-with-icon">
+                        <span class="dot-icon dot-green"></span>
+                        Empleados
+                    </span>
+                </h2>
+                <form method="POST" action="/" class="compact-form">
+                    <input type="hidden" name="accion" value="nuevo_empleado">
+                    <input type="hidden" name="tab_retorno" value="entidades">
+                    <div class="form-row">
+                        <input type="text" name="nombre" placeholder="Nombre completo" required>
+                        <input type="text" name="cargo" placeholder="Cargo" required>
+                        <select name="id_sucursal" required>{{OPCIONES_SUCURSAL}}</select>
+                    </div>
+                    <button type="submit" class="btn btn-sm">+ Agregar Empleado</button>
+                </form>
+                <table>
+                    <thead><tr><th>ID</th><th>Nombre</th><th>Cargo</th><th>Sucursal</th><th>Acciones</th></tr></thead>
+                    <tbody>{{FILAS_EMPLEADOS}}</tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <span class="title-with-icon">
+                        <span class="dot-icon dot-amber"></span>
+                        Proveedores
+                    </span>
+                </h2>
+                <form method="POST" action="/" class="compact-form">
+                    <input type="hidden" name="accion" value="nuevo_proveedor">
+                    <input type="hidden" name="tab_retorno" value="entidades">
+                    <div class="form-row">
+                        <input type="text" name="nombre" placeholder="Nombre del proveedor" required>
+                        <input type="text" name="telefono" placeholder="Teléfono" required>
+                    </div>
+                    <button type="submit" class="btn btn-sm">+ Agregar Proveedor</button>
+                </form>
+                <table>
+                    <thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+                    <tbody>{{FILAS_PROVEEDORES}}</tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <span class="title-with-icon">
+                        <span class="dot-icon dot-purple"></span>
+                        Categorías
+                    </span>
+                </h2>
+                <form method="POST" action="/" class="compact-form">
+                    <input type="hidden" name="accion" value="nueva_categoria">
+                    <input type="hidden" name="tab_retorno" value="entidades">
+                    <div class="form-row">
+                        <input type="text" name="nombre" placeholder="Nombre de categoría" required>
+                        <input type="text" name="descripcion" placeholder="Descripción" required>
+                    </div>
+                    <button type="submit" class="btn btn-sm">+ Agregar Categoría</button>
+                </form>
+                <table>
+                    <thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Acciones</th></tr></thead>
+                    <tbody>{{FILAS_CATEGORIAS}}</tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>
+                <span class="title-with-icon">
+                    <span class="dot-icon dot-blue"></span>
+                    Clientes Registrados
+                </span>
+            </h2>
+            <table>
+                <thead><tr><th>ID Cliente</th><th>Nombre</th><th>Acciones</th></tr></thead>
+                <tbody>{{FILAS_CLIENTES}}</tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="tab-analitica" class="tab-content">
+        <div class="card">
+            <h2>
+                <span class="title-with-icon">
+                    <span class="dot-icon dot-purple"></span>
+                    Ranking de Ventas y Acumulado por Cliente
+                </span>
+            </h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Puesto</th><th>Venta</th><th>Cliente</th>
+                        <th>Fecha y Hora</th><th>Monto Venta</th><th>Acumulado Cliente</th>
+                    </tr>
+                </thead>
+                <tbody>{{FILAS_CTE}}</tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>
+                <span class="title-with-icon">
+                    <span class="dot-icon dot-amber"></span>
+                    Productos sin Ventas Registradas
+                </span>
+            </h2>
+            <table>
+                <thead>
+                    <tr><th>ID Producto</th><th>Código de Barras</th><th>Nombre</th><th>Precio</th></tr>
+                </thead>
+                <tbody>{{FILAS_SIN_VENTA}}</tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<div id="modal-recibo" class="modal-overlay" style="display:none;">
+    <div class="modal-ticket">
+        <div class="ticket-header">
+            <h3>TIENDA "MR. 5"</h3>
+            <p>NOTA DE VENTA</p>
+            <small id="recibo-sucursal"></small>
+        </div>
+        <div class="ticket-meta">
+            <div><strong>Venta N°:</strong> <span id="recibo-id"></span></div>
+            <div><strong>Fecha:</strong> <span id="recibo-fecha"></span></div>
+            <div><strong>Empleado:</strong> <span id="recibo-empleado"></span></div>
+            <div><strong>Cliente:</strong> <span id="recibo-cliente"></span></div>
+            <div><strong>Pago:</strong> <span id="recibo-pago"></span></div>
+        </div>
+        <table class="ticket-table">
+            <thead>
+                <tr><th>Cant.</th><th>Producto</th><th>P. Unit.</th><th>Subtotal</th></tr>
+            </thead>
+            <tbody id="recibo-items"></tbody>
+        </table>
+        <div class="ticket-total">
+            TOTAL: <span id="recibo-total"></span>
+        </div>
+        <div class="ticket-actions no-print">
+            <button type="button" class="btn btn-success" onclick="window.print()">Imprimir</button>
+            <button type="button" class="btn btn-secondary" onclick="cerrarModalRecibo()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-editar" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+        <h2 id="modal-editar-titulo">Editar Registro</h2>
+        <form method="POST" action="/">
+            <input type="hidden" name="accion" id="edit-accion">
+            <input type="hidden" name="tab_retorno" id="edit-tab">
+            <input type="hidden" id="edit-id-input">
+            <div id="edit-campos"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
+                <button type="submit" class="btn btn-success">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<template id="template-opciones-sucursal">{{OPCIONES_SUCURSAL}}</template>
+<template id="template-opciones-categoria">{{OPCIONES_CATEGORIA}}</template>
+<template id="template-opciones-proveedor">{{OPCIONES_PROVEEDOR}}</template>
+
+<template id="template-linea-producto">
+    <div class="item-venta-row">
+        <div>
+            <select name="id_producto[]" class="select-producto" onchange="recalcularTotalEstimado()" required>
+                {{OPCIONES_PRODUCTO}}
+            </select>
+        </div>
+        <div>
+            <input type="number" name="cantidad[]" class="input-cantidad" min="1" value="1" oninput="recalcularTotalEstimado()" required>
+        </div>
+        <div>
+            <button type="button" class="btn btn-danger" onclick="eliminarLineaProducto(this)">Quitar</button>
+        </div>
+    </div>
+</template>
+
+<script id="datos-recibos-json" type="application/json">{{JSON_RECIBOS}}</script>
+<script src="/script.js"></script>
+</body>
+</html>
