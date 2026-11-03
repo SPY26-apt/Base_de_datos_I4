@@ -3,7 +3,6 @@
 **Universidad:** UAGRM (Universidad Autónoma Gabriel René Moreno)  
 **Materia:** INF112 - Base de Datos I  
 **Motor de Base de Datos:** MySQL 8.4 (InnoDB)  
-**Lenguaje e Interfaz:** Python 3 (`http.server` + `mysql-connector-python`), HTML5, CSS3 y JavaScript  
 
 ---
 
