@@ -2,7 +2,7 @@
 
 ## 9) Implementación Física en SQL (`script_mr5_completo.sql`)
 
-El archivo [`script_mr5_completo.sql`](./script_mr5.sql) implementa el 100% de los contenidos prácticos de las Unidades III y IV sobre **MySQL 8.4** usando el motor transaccional `InnoDB`:
+El archivo [`script_mr5.sql`](./script_mr5.sql) implementa el 100% de los contenidos prácticos de las Unidades III y IV sobre **MySQL 8.4** usando el motor transaccional `InnoDB`:
 
 1. **DDL y Restricciones Relacionales:**
    - Claves primarias simples (`AUTO_INCREMENT`) y compuestas en `INVENTARIO (id_sucursal, id_producto)` y `DETALLE_VENTA (id_venta, id_producto)`.
