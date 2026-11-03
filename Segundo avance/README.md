@@ -1,4 +1,4 @@
-# FASE II — SEGUNDO AVANCE: MODELO RELACIONAL, NORMALIZACIÓN (1FN-3FN), SQL E INTERFAZ WEB
+# FASE II — SEGUNDO AVANCE
 
 ## 9) Implementación Física en SQL (`script_mr5_completo.sql`)
 
