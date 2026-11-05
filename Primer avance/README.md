@@ -434,7 +434,7 @@ No se permiten líneas de venta con cantidad cero o negativa.
 Las existencias deben ser un número entero mayor que cero.
 
 ```sql
-CHECK (stock >=} 0)
+CHECK (stock > 0)
 ```
 
 Tener stock cero significa que el producto no tiene unidades disponibles en esa sucursal; no significa que deba eliminarse su registro.
